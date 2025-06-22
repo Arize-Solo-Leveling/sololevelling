@@ -22,10 +22,6 @@ public class QuestController {
     private QuestService questService;
     @Autowired
     private QuestGenerator questGenerator;
-    @Autowired
-    private QuestRepository questRepository;
-    @Autowired
-    private UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<?> getQuests(Principal principal) {

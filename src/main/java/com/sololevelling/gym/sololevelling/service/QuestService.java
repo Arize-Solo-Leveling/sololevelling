@@ -33,8 +33,6 @@ public class QuestService {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserQuestRepository userQuestRepository;
 
     public List<QuestDto> getAvailableQuests(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
