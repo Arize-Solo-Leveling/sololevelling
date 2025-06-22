@@ -24,8 +24,6 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
-    User findUserByName(String name);
-
     @Query("SELECT u FROM User u ORDER BY u.level DESC, u.experience DESC")
     List<User> findTopGlobalLeaderboard();
 
