@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -32,7 +32,7 @@ public class QuestController {
     private QuestGenerator questGenerator;
 
     @GetMapping
-    public ResponseEntity<?> getQuests(Principal principal) {
+    public ResponseEntity<?> getAvailableQuests(Principal principal) {
         return ResponseEntity.ok(questService.getAvailableQuests(principal.getName()));
     }
 

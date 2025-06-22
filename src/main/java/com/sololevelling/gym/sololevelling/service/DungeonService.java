@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -26,6 +26,7 @@ import com.sololevelling.gym.sololevelling.util.StatsLowException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 
@@ -96,6 +97,12 @@ public class DungeonService {
         dungeon.setLootReward(request.getLootReward());
         dungeon.setWeekly(request.isWeekly());
         dungeon.setCompleted(false);
+        dungeon.setCreatedAt(LocalDateTime.now());
+        if (request.isWeekly()) {
+            dungeon.setExpiresAt(dungeon.getCreatedAt().plusWeeks(1));
+        } else {
+            dungeon.setExpiresAt(dungeon.getCreatedAt().plusDays(1));
+        }
         dungeon.setUser(user);
 
         return dungeonRepository.save(dungeon);

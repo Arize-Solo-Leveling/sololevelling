@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -11,10 +11,7 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -32,7 +29,9 @@ public class Quest {
     private String description;
     private int experienceReward;
     private boolean daily; // true = daily, false = weekly
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+    @Column(updatable = false)
     private LocalDateTime expiresAt;
 
     @ManyToMany(mappedBy = "completedQuests")

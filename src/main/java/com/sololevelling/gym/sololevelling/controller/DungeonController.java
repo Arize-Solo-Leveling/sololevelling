@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -16,6 +16,7 @@ import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonRequest;
 import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.service.DungeonService;
+import com.sololevelling.gym.sololevelling.service.WeeklyDungeonService;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import com.sololevelling.gym.sololevelling.util.StatsLowException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -36,6 +38,8 @@ public class DungeonController {
     private UserRepository userRepo;
     @Autowired
     private DungeonRepository dungeonRepo;
+    @Autowired
+    private WeeklyDungeonService weeklyDungeonService;
 
     @GetMapping
     public ResponseEntity<?> getAvailableDungeons(Principal principal) {
@@ -61,8 +65,13 @@ public class DungeonController {
 
     @PostMapping
     public ResponseEntity<?> createDungeon(@RequestBody DungeonRequest request, Principal principal) {
-        Dungeon dungeon = dungeonService.createDungeonForUser(principal.getName(), request);
-        return ResponseEntity.ok(dungeon);
+        return ResponseEntity.ok(dungeonService.createDungeonForUser(principal.getName(), request));
+    }
+
+    @PostMapping("/{userId}/generate")
+//    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createRandomDungeon(@PathVariable UUID userId) {
+        return ResponseEntity.ok(weeklyDungeonService.pickRandomWeeklyDungeon(userId));
     }
 
 }
