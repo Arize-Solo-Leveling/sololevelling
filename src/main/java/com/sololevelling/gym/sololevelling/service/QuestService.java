@@ -10,7 +10,6 @@ import com.sololevelling.gym.sololevelling.model.dto.quest.QuestDto;
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestMapper;
 import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.QuestRepository;
-import com.sololevelling.gym.sololevelling.repo.UserQuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

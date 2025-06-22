@@ -2,8 +2,6 @@ package com.sololevelling.gym.sololevelling.controller;
 
 import com.sololevelling.gym.sololevelling.model.dto.quest.CreateQuestRequest;
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestDto;
-import com.sololevelling.gym.sololevelling.repo.QuestRepository;
-import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.service.QuestGenerator;
 import com.sololevelling.gym.sololevelling.service.QuestService;
 import org.springframework.beans.factory.annotation.Autowired;
