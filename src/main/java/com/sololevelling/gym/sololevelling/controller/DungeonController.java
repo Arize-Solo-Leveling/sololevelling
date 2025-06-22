@@ -46,8 +46,8 @@ public class DungeonController {
         return ResponseEntity.ok(dungeonService.getAvailableDungeons(principal.getName()));
     }
 
-    @PostMapping("/attempt")
-    public ResponseEntity<?> attemptDungeon(@RequestParam Long dungeonId, Principal principal) throws AccessDeniedException, StatsLowException {
+    @PostMapping("/{dungeonId}/attempt")
+    public ResponseEntity<?> attemptDungeon(@PathVariable Long dungeonId, Principal principal) throws AccessDeniedException, StatsLowException {
         return ResponseEntity.ok(dungeonService.attemptDungeon(dungeonId, principal.getName()));
     }
 
@@ -63,9 +63,9 @@ public class DungeonController {
         return ResponseEntity.ok(dungeonService.getDungeonHistory(principal.getName()));
     }
 
-    @PostMapping
-    public ResponseEntity<?> createDungeon(@RequestBody DungeonRequest request, Principal principal) {
-        return ResponseEntity.ok(dungeonService.createDungeonForUser(principal.getName(), request));
+    @PostMapping("/{userId}/create")
+    public ResponseEntity<?> createDungeon(@RequestBody DungeonRequest request, @PathVariable UUID userId) {
+        return ResponseEntity.ok(dungeonService.createDungeonForUser(request, userId));
     }
 
     @PostMapping("/{userId}/generate")

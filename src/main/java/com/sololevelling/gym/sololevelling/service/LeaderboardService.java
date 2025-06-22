@@ -12,6 +12,7 @@ package com.sololevelling.gym.sololevelling.service;
 
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.model.dto.leaderboard.LeaderboardEntryDto;
+import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,8 @@ public class LeaderboardService {
                 .toList();
     }
 
-    public List<LeaderboardEntryDto> getClassLeaderboard(String characterClass) {
-        return userRepository.findTopLeaderboardByClass(characterClass)
+    public List<LeaderboardEntryDto> getClassLeaderboard(UserClass userClass) {
+        return userRepository.findTopLeaderboardByClass(userClass)
                 .stream()
                 .map(this::mapToDto)
                 .toList();

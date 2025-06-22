@@ -11,13 +11,11 @@
 package com.sololevelling.gym.sololevelling.controller;
 
 import com.sololevelling.gym.sololevelling.model.dto.leaderboard.LeaderboardEntryDto;
+import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
 import com.sololevelling.gym.sololevelling.service.LeaderboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,8 +31,8 @@ public class LeaderboardController {
         return ResponseEntity.ok(leaderboardService.getGlobalLeaderboard());
     }
 
-    @GetMapping("/class")
-    public ResponseEntity<List<LeaderboardEntryDto>> getClassLeaderboard(@RequestParam String className) {
+    @GetMapping("/{className}/class")
+    public ResponseEntity<List<LeaderboardEntryDto>> getClassLeaderboard(@PathVariable UserClass className) {
         return ResponseEntity.ok(leaderboardService.getClassLeaderboard(className));
     }
 }

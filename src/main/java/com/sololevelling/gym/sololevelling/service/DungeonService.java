@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class DungeonService {
@@ -86,8 +87,8 @@ public class DungeonService {
         }
     }
 
-    public Dungeon createDungeonForUser(String userEmail, DungeonRequest request) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new RuntimeException("User not found"));
+    public Dungeon createDungeonForUser(DungeonRequest request, UUID uuid) {
+        User user = userRepository.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
 
         Dungeon dungeon = new Dungeon();
         dungeon.setName(request.getName());

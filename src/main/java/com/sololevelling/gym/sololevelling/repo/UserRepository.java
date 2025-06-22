@@ -11,6 +11,7 @@
 package com.sololevelling.gym.sololevelling.repo;
 
 import com.sololevelling.gym.sololevelling.model.User;
+import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u ORDER BY u.level DESC, u.experience DESC")
     List<User> findTopGlobalLeaderboard();
 
-    @Query("SELECT u FROM User u WHERE u.userClass = :characterClass ORDER BY u.level DESC, u.experience DESC")
-    List<User> findTopLeaderboardByClass(@Param("characterClass") String characterClass);
+    @Query("SELECT u FROM User u WHERE u.userClass = :userClass ORDER BY u.level DESC, u.experience DESC")
+    List<User> findTopLeaderboardByClass(@Param("userClass") UserClass userClass);
 
 }

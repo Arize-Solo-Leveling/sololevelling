@@ -29,13 +29,13 @@ public class InventoryController {
         return ResponseEntity.ok(inventoryService.getInventory(principal.getName()));
     }
 
-    @PostMapping("/equip")
-    public ResponseEntity<?> equip(@RequestParam Long itemId, Principal principal) {
+    @PostMapping("/{itemId}/equip")
+    public ResponseEntity<?> equip(@PathVariable Long itemId, Principal principal) {
         return ResponseEntity.ok(inventoryService.equipItem(principal.getName(), itemId));
     }
 
-    @PostMapping("/unequip")
-    public ResponseEntity<?> unequip(@RequestParam Long itemId, Principal principal) {
+    @PostMapping("/{itemId}/unequip")
+    public ResponseEntity<?> unequip(@PathVariable Long itemId, Principal principal) {
         return ResponseEntity.ok(inventoryService.unequipItem(principal.getName(), itemId));
     }
 }
