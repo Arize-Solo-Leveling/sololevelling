@@ -23,6 +23,7 @@ public class Quest {
     private int experienceReward;
     private boolean daily; // true = daily, false = weekly
     private LocalDateTime createdAt;
+    private LocalDateTime expiresAt;
 
     @ManyToMany(mappedBy = "completedQuests")
     @JsonIgnore

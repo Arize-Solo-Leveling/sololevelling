@@ -8,5 +8,6 @@ public class QuestDto {
     public String description;
     public int experienceReward;
     public boolean daily;
+    public boolean expired;
     public boolean completed;
 }

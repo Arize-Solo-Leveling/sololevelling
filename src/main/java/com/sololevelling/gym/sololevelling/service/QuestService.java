@@ -10,6 +10,7 @@ import com.sololevelling.gym.sololevelling.model.dto.quest.QuestDto;
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestMapper;
 import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.QuestRepository;
+import com.sololevelling.gym.sololevelling.repo.UserQuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,17 +31,27 @@ public class QuestService {
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private UserQuestRepository userQuestRepository;
 
     public List<QuestDto> getAvailableQuests(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         LocalDateTime resetTime = LocalDateTime.now().minusDays(1);
         List<Quest> recentQuests = questRepo.findAllByCreatedAtAfter(resetTime);
-        return recentQuests.stream().map(q -> QuestMapper.toDto(q, user)).toList();
+        return recentQuests.stream()
+                .filter(q -> !user.getCompletedQuests().contains(q)) // skip completed
+                .map(q -> QuestMapper.toDto(q, user))
+                .toList();
     }
 
     public String completeQuest(UUID questId, String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         Quest quest = questRepo.findById(questId).orElseThrow();
+        if (LocalDateTime.now().isAfter(quest.getExpiresAt())) {
+            return "Quest expired.";
+        }
 
         if (user.getCompletedQuests().contains(quest)) {
             return "Already completed.";
@@ -104,16 +115,45 @@ public class QuestService {
         return item;
     }
 
-    public QuestDto createQuest(CreateQuestRequest req) {
+    public QuestDto createQuest(CreateQuestRequest req, UUID uuid) {
         Quest quest = new Quest();
-        User user = userRepo.findUserByName("John manju");
+        User user = userRepository.findById(uuid).orElseThrow();
         quest.setTitle(req.title);
         quest.setDescription(req.description);
         quest.setExperienceReward(req.experienceReward);
         quest.setDaily(req.daily);
         quest.setCreatedAt(LocalDateTime.now());
+        if (req.daily) {
+            quest.setExpiresAt(quest.getCreatedAt().plusDays(1));
+        } else {
+            quest.setExpiresAt(quest.getCreatedAt().plusWeeks(1));
+        }
 
         questRepo.save(quest);
         return QuestMapper.toDto(quest, user); // pass null user to skip completed status
     }
+
+    public Object getQuestHistory(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+        LocalDateTime resetTime = LocalDateTime.now().minusDays(1);
+        List<Quest> recentQuests = questRepo.findAllByCreatedAtAfter(resetTime);
+        return recentQuests.stream()
+                .filter(q -> user.getCompletedQuests().contains(q)) // skip completed
+                .map(q -> QuestMapper.toDto(q, user))
+                .toList();
+    }
+
+    public List<QuestDto> getWeeklyQuests(String email) {
+        User user = userRepo.findByEmail(email).orElseThrow();
+
+        List<Quest> weeklyQuests = questRepo.findAllByDailyFalse();
+
+        return weeklyQuests.stream()
+                .map(quest -> {
+                    boolean completed = user.getCompletedQuests().contains(quest);
+                    return QuestMapper.toDto(quest, completed);
+                })
+                .toList();
+    }
+
 }
