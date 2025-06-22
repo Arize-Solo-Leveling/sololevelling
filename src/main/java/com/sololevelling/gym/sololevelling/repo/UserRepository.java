@@ -31,4 +31,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u WHERE u.userClass = :userClass ORDER BY u.level DESC, u.experience DESC")
     List<User> findTopLeaderboardByClass(@Param("userClass") UserClass userClass);
 
+    boolean existsByEmail(String email);
 }

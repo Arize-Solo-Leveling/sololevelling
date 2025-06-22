@@ -42,7 +42,10 @@ public class UserService implements UserDetailsService {
     @Autowired
     private UserMapper userMapper;
 
-    public AuthResponse registerUser(AuthRequest req) {
+    public String registerUser(AuthRequest req) {
+        if (userRepo.existsByEmail(req.email)) {
+            throw new IllegalArgumentException("Email already registered");
+        }
         User user = new User();
         user.setName(req.name);
         user.setEmail(req.email);
@@ -52,7 +55,7 @@ public class UserService implements UserDetailsService {
         user.setStatPoints(20);
 
         userRepo.save(user);
-        return new AuthResponse(jwtUtil.generateToken(user.getEmail()), user.getName());
+        return "Registration successful. Please log in.";
     }
 
     public AuthResponse loginUser(AuthRequest req) {

@@ -13,7 +13,7 @@ package com.sololevelling.gym.sololevelling.service;
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.model.Workout;
 import com.sololevelling.gym.sololevelling.model.dto.progress.ProgressSummaryDto;
-import com.sololevelling.gym.sololevelling.model.dto.progress.StatSnapshotDto;
+import com.sololevelling.gym.sololevelling.model.dto.progress.StatProgressDto;
 import com.sololevelling.gym.sololevelling.model.dto.progress.WorkoutGraphDto;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.repo.WorkoutRepository;
@@ -30,18 +30,17 @@ public class ProgressService {
     @Autowired
     private WorkoutRepository workoutRepo;
 
-    public List<StatSnapshotDto> getStatProgress(String email) {
+    public StatProgressDto getStatProgress(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
-        // You'd track snapshots separately if needed.
-        // For demo: mock stat history using workout history dates
-        return workoutRepo.findByUser(user).stream().map(w -> {
-            StatSnapshotDto dto = new StatSnapshotDto();
-            dto.date = w.getDate();
-            dto.level = user.getLevel(); // or computed if you track over time
-            dto.experience = user.getExperience();
-            dto.strength = user.getStats().getStrength(); // optional historic values
-            return dto;
-        }).toList();
+
+        StatProgressDto dto = new StatProgressDto();
+        dto.level=user.getLevel();
+        dto.strength= user.getStats().getStrength();
+        dto.endurance= user.getStats().getEndurance();
+        dto.agility= user.getStats().getAgility();
+        dto.intelligence= user.getStats().getIntelligence();
+
+        return dto;
     }
 
     public List<WorkoutGraphDto> getWorkoutGraph(String email) {
