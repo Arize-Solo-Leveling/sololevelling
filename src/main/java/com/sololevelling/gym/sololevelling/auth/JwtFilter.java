@@ -10,6 +10,7 @@
 
 package com.sololevelling.gym.sololevelling.auth;
 
+import com.sololevelling.gym.sololevelling.repo.AccessTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,10 +30,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
+    private final AccessTokenRepository accessTokenRepo;
 
-    public JwtFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
+    public JwtFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil, AccessTokenRepository accessTokenRepo) {
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
+        this.accessTokenRepo = accessTokenRepo;
     }
 
     @Override
@@ -46,6 +49,12 @@ public class JwtFilter extends OncePerRequestFilter {
             String username = jwtUtil.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                boolean tokenExists = accessTokenRepo.findByToken(token).isPresent();
+                if (!tokenExists) {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalidated access token");
+                    return;
+                }
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtUtil.validateToken(token, userDetails)) {

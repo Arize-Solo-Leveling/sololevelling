@@ -21,6 +21,7 @@ import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import com.sololevelling.gym.sololevelling.util.StatsLowException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -42,16 +43,19 @@ public class DungeonController {
     private WeeklyDungeonService weeklyDungeonService;
 
     @GetMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getAvailableDungeons(Principal principal) {
         return ResponseEntity.ok(dungeonService.getAvailableDungeons(principal.getName()));
     }
 
     @PostMapping("/{dungeonId}/attempt")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> attemptDungeon(@PathVariable Long dungeonId, Principal principal) throws AccessDeniedException, StatsLowException {
         return ResponseEntity.ok(dungeonService.attemptDungeon(dungeonId, principal.getName()));
     }
 
     @GetMapping("/week")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getWeeklyDungeons(Principal principal) {
         User user = userRepo.findByEmail(principal.getName()).orElseThrow();
         List<Dungeon> weekly = dungeonRepo.findByUserAndWeeklyTrue(user);
@@ -59,19 +63,20 @@ public class DungeonController {
     }
 
     @GetMapping("/history")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getDungeonHistory(Principal principal) {
         return ResponseEntity.ok(dungeonService.getDungeonHistory(principal.getName()));
     }
 
     @PostMapping("/{userId}/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createDungeon(@RequestBody DungeonRequest request, @PathVariable UUID userId) {
         return ResponseEntity.ok(dungeonService.createDungeonForUser(request, userId));
     }
 
     @PostMapping("/{userId}/generate")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createRandomDungeon(@PathVariable UUID userId) {
         return ResponseEntity.ok(weeklyDungeonService.pickRandomWeeklyDungeon(userId));
     }
-
 }

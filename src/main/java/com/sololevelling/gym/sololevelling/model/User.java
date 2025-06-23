@@ -17,6 +17,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -29,7 +30,6 @@ public class User {
     private String name;
     private String email;
     private String password;
-    private String role = "USER"; // or ADMIN
 
     private Integer level = 1;
     private Integer experience = 0;
@@ -40,6 +40,9 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private UserClass userClass;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;
+
 
     @ManyToMany
     @JoinTable(

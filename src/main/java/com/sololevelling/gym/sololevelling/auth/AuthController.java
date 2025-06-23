@@ -11,6 +11,8 @@
 package com.sololevelling.gym.sololevelling.auth;
 
 import com.sololevelling.gym.sololevelling.model.dto.auth.AuthRequest;
+import com.sololevelling.gym.sololevelling.model.dto.auth.LoginRequest;
+import com.sololevelling.gym.sololevelling.model.dto.auth.TokenRefreshRequest;
 import com.sololevelling.gym.sololevelling.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -37,7 +41,13 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Login existing user")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(userService.loginUser(request));
+    }
+    @PostMapping("/refresh")
+
+    public ResponseEntity<?> refresh(@RequestBody TokenRefreshRequest request) {
+        String newToken = userService.refreshAccessToken(request.refreshToken);
+        return ResponseEntity.ok(Map.of("accessToken", newToken));
     }
 }

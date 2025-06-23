@@ -13,12 +13,7 @@ package com.sololevelling.gym.sololevelling.model.dto.auth;
 import lombok.Data;
 
 @Data
-public class AuthResponse {
-    public String token;
-    public String refreshToken;
-
-    public AuthResponse(String accessToken, String refreshToken) {
-        this.token = accessToken;
-        this.refreshToken = refreshToken;
-    }
+public class LoginRequest {
+    public String email;
+    public String password;
 }

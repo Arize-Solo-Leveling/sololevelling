@@ -16,6 +16,7 @@ import com.sololevelling.gym.sololevelling.service.QuestGenerator;
 import com.sololevelling.gym.sololevelling.service.QuestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -32,34 +33,38 @@ public class QuestController {
     private QuestGenerator questGenerator;
 
     @GetMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getAvailableQuests(Principal principal) {
         return ResponseEntity.ok(questService.getAvailableQuests(principal.getName()));
     }
 
     @PostMapping("/{questId}/complete")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> completeQuest(@PathVariable UUID questId, Principal principal) {
         return ResponseEntity.ok(questService.completeQuest(questId, principal.getName()));
     }
 
     @GetMapping("/week")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getWeeklyQuests(Principal principal) {
         List<QuestDto> weekly = questService.getWeeklyQuests(principal.getName());
         return ResponseEntity.ok(weekly);
     }
 
     @GetMapping("/history")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getQuestHistory(Principal principal) {
         return ResponseEntity.ok(questService.getQuestHistory(principal.getName()));
     }
 
     @PostMapping("/{userId}/create")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
     public ResponseEntity<?> createQuest(@RequestBody CreateQuestRequest request, @PathVariable UUID userId) {
         return ResponseEntity.ok(questService.createQuest(request, userId));
     }
 
     @PostMapping("/{userId}/generate")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
     public ResponseEntity<?> createRandomQuest(@PathVariable UUID userId) {
         return ResponseEntity.ok(questGenerator.pickRandomDailyQuests(userId));
     }
