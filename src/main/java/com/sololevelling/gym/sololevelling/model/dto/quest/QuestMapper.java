@@ -23,19 +23,7 @@ public class QuestMapper {
         dto.description = quest.getDescription();
         dto.experienceReward = quest.getExperienceReward();
         dto.daily = quest.isDaily();
-        dto.completed = user.getCompletedQuests().contains(quest);
-        dto.expired = LocalDateTime.now().isAfter(quest.getExpiresAt());
-        return dto;
-    }
-
-    public static QuestDto toDto(Quest quest, boolean completed) {
-        QuestDto dto = new QuestDto();
-        dto.id = quest.getId();
-        dto.title = quest.getTitle();
-        dto.description = quest.getDescription();
-        dto.experienceReward = quest.getExperienceReward();
-        dto.daily = quest.isDaily();
-        dto.completed = completed;
+        dto.completed = user.getQuests().stream().anyMatch(q-> q.isCompleted() && q.getId().equals(quest.getId()));
         dto.expired = LocalDateTime.now().isAfter(quest.getExpiresAt());
         return dto;
     }

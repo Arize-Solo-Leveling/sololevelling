@@ -44,14 +44,10 @@ public class User {
     private Set<Role> roles;
 
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_completed_quests",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "quest_id")
-    )
+    @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private List<Quest> completedQuests = new ArrayList<>();
+    private List<Quest> quests;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Workout> workouts = new ArrayList<>();
@@ -59,8 +55,8 @@ public class User {
     private List<InventoryItem> inventory = new ArrayList<>();
 
     public void completeQuest(Quest quest) {
-        if (!this.completedQuests.contains(quest)) {
-            this.completedQuests.add(quest);
+        if (!this.quests.contains(quest)) {
+            this.quests.add(quest);
         }
     }
 

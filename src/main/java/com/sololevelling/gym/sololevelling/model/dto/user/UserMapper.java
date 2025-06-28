@@ -10,6 +10,7 @@
 
 package com.sololevelling.gym.sololevelling.model.dto.user;
 
+import com.sololevelling.gym.sololevelling.model.Quest;
 import com.sololevelling.gym.sololevelling.model.Stats;
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.model.dto.inventory.InventoryItemDto;
@@ -68,7 +69,7 @@ public class UserMapper {
             return itemSummaryDto;
         }).toList();
 
-        dto.completedQuests = user.getCompletedQuests().stream().map(quest -> {
+        dto.completedQuests = user.getQuests().stream().filter(Quest::isCompleted).map(quest -> {
             QuestSummaryDto questSummaryDto = new QuestSummaryDto();
             questSummaryDto.id = quest.getId();
             questSummaryDto.title = quest.getTitle();

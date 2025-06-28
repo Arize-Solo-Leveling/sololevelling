@@ -39,18 +39,15 @@ public class QuestService {
     @Autowired
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
-    private UserService userService;
-    @Autowired
     private UserRepository userRepository;
     @Autowired
     private ExperienceService experienceService;
 
     public List<QuestDto> getAvailableQuests(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
-        LocalDateTime resetTime = LocalDateTime.now().minusDays(1);
-        List<Quest> recentQuests = questRepo.findAllByCreatedAtAfter(resetTime);
+        List<Quest> recentQuests = questRepo.findQuestsByUser_Id(user.getId());
         return recentQuests.stream()
-                .filter(q -> !user.getCompletedQuests().contains(q)) // skip completed
+                .filter(q -> !q.isCompleted())
                 .map(q -> QuestMapper.toDto(q, user))
                 .toList();
     }
@@ -62,12 +59,14 @@ public class QuestService {
             return "Quest expired.";
         }
 
-        if (user.getCompletedQuests().contains(quest)) {
+        if (user.getQuests().contains(quest) && quest.isCompleted()) {
             return "Already completed.";
         }
         InventoryItem rewardItem = generateRandomReward(user);
         inventoryItemRepository.save(rewardItem);
         user.completeQuest(quest);
+        quest.setCompleted(true);
+        questRepo.save(quest);
         userRepo.save(user);
         experienceService.addExperience(user, quest.getExperienceReward());
         return "Quest completed. EXP +" + quest.getExperienceReward();
@@ -137,17 +136,16 @@ public class QuestService {
         } else {
             quest.setExpiresAt(quest.getCreatedAt().plusWeeks(1));
         }
-
+        quest.setUser(user);
         questRepo.save(quest);
         return QuestMapper.toDto(quest, user); // pass null user to skip completed status
     }
 
     public Object getQuestHistory(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
-        LocalDateTime resetTime = LocalDateTime.now().minusDays(1);
-        List<Quest> recentQuests = questRepo.findAllByCreatedAtAfter(resetTime);
+        List<Quest> recentQuests = questRepo.findQuestsByUser_Id(user.getId());
         return recentQuests.stream()
-                .filter(q -> user.getCompletedQuests().contains(q)) // skip completed
+                .filter(Quest::isCompleted)
                 .map(q -> QuestMapper.toDto(q, user))
                 .toList();
     }
@@ -155,13 +153,11 @@ public class QuestService {
     public List<QuestDto> getWeeklyQuests(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
 
-        List<Quest> weeklyQuests = questRepo.findAllByDailyFalse();
+        List<Quest> weeklyQuests = questRepo.findQuestsByUser_Id(user.getId());
 
         return weeklyQuests.stream()
-                .map(quest -> {
-                    boolean completed = user.getCompletedQuests().contains(quest);
-                    return QuestMapper.toDto(quest, completed);
-                })
+                .filter(q -> !q.isDaily())
+                .map(quest -> QuestMapper.toDto(quest, user))
                 .toList();
     }
 

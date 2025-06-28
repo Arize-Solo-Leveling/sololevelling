@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.Random;
 import java.util.UUID;
 
@@ -49,37 +49,41 @@ public class QuestGenerator {
 
     @Scheduled(cron = "0 0 0 * * *") // daily at midnight
     public void generateDailyQuests() {
-        List<Quest> dailyQuests = newQuests.stream().filter(Quest::isDaily).toList();
-        questRepo.saveAll(dailyQuests);
+        List<Quest> dailyQuestsTemplate = newQuests.stream().filter(Quest::isDaily).toList();
         List<User> users = userRepo.findAll();
 
-        for (User user : users) {
-            setQuestToUser(user, newQuests);
-        }
-    }
+        List<Quest> questsToSave = new ArrayList<>();
 
-    private void setQuestToUser(User user, List<Quest> newQuests) {
-        for (Quest quest : newQuests) {
-            UserQuest uq = new UserQuest();
-            uq.setUser(user);
-            uq.setQuest(quest);
-            uq.setCompleted(false);
-            uq.setAssignedAt(LocalDateTime.now());
-            userQuestRepo.save(uq);
+        for (User user : users) {
+            for (Quest template : dailyQuestsTemplate) {
+                Quest userQuest = createQuest(template.getTitle(),template.getDescription(),template.getExperienceReward(), template.isDaily());
+                userQuest.setUser(user);
+                questsToSave.add(userQuest);
+            }
         }
+
+        questRepo.saveAll(questsToSave);
     }
 
     public List<Quest> pickRandomDailyQuests(UUID uuid) {
-        List<Quest> allQuests = new java.util.ArrayList<>(newQuests);
+        List<Quest> allTemplates = new ArrayList<>(newQuests);
 
-        Collections.shuffle(allQuests);
+        Collections.shuffle(allTemplates);
         int count = new Random().nextInt(2) + 2; // Random between 2 and 3
-        List<Quest> quests = allQuests.subList(0, Math.min(count, allQuests.size()));
-        questRepo.saveAll(quests);
+        List<Quest> selectedTemplates = allTemplates.subList(0, Math.min(count, allTemplates.size()));
+
         User user = userRepo.findById(uuid).orElseThrow();
-        setQuestToUser(user, quests);
-        return quests;
+        List<Quest> personalizedQuests = new ArrayList<>();
+
+        for (Quest template : selectedTemplates) {
+            Quest clone = createQuest(template.getTitle(),template.getDescription(),template.getExperienceReward(), template.isDaily());
+            clone.setUser(user);
+            personalizedQuests.add(clone);
+        }
+
+        return questRepo.saveAll(personalizedQuests);
     }
+
 
     private Quest createQuest(String title, String desc, int xp, boolean daily) {
         Quest q = new Quest();
@@ -93,6 +97,7 @@ public class QuestGenerator {
         } else {
             q.setExpiresAt(LocalDateTime.now().plusWeeks(1));
         }
+        q.setCompleted(false);
         return q;
     }
 }

@@ -34,9 +34,12 @@ public class Quest {
     @Column(updatable = false)
     private LocalDateTime expiresAt;
 
-    @ManyToMany(mappedBy = "completedQuests")
+    private boolean completed;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     @JsonIgnore
-    private List<User> usersCompleted = new ArrayList<>();
+    private User user;
 
     // Getters & Setters
 }

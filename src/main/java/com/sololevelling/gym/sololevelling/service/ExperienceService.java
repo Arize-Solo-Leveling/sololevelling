@@ -16,6 +16,8 @@ public class ExperienceService {
 
     public void addExperience(User user, int expGained) {
         int exp = user.getExperience() + expGained;
+        user.setExperience(exp);
+
         int level = user.getLevel();
         int statPoints = user.getStatPoints();
 
@@ -29,8 +31,6 @@ public class ExperienceService {
             level++;
             statPoints += 5;
         }
-
-        user.setExperience(exp);
         user.setLevel(level);
         user.setStatPoints(statPoints);
         userRepo.save(user);

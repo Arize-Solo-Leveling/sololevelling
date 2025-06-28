@@ -22,5 +22,6 @@ import java.util.UUID;
 public interface QuestRepository extends JpaRepository<Quest, UUID> {
     List<Quest> findAllByCreatedAtAfter(LocalDateTime after);
 
-    List<Quest> findAllByDailyFalse();
+    List<Quest> findQuestsByUser_Id(UUID userId);
+
 }
