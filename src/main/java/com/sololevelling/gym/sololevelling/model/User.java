@@ -15,6 +15,7 @@ import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +54,8 @@ public class User {
     private List<Workout> workouts = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<InventoryItem> inventory = new ArrayList<>();
+
+    private LocalDateTime lastLogout;
 
     public void completeQuest(Quest quest) {
         if (!this.quests.contains(quest)) {

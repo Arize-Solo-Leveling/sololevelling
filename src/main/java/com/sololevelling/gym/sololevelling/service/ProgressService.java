@@ -34,11 +34,11 @@ public class ProgressService {
         User user = userRepo.findByEmail(email).orElseThrow();
 
         StatProgressDto dto = new StatProgressDto();
-        dto.level=user.getLevel();
-        dto.strength= user.getStats().getStrength();
-        dto.endurance= user.getStats().getEndurance();
-        dto.agility= user.getStats().getAgility();
-        dto.intelligence= user.getStats().getIntelligence();
+        dto.level = user.getLevel();
+        dto.strength = user.getStats().getStrength();
+        dto.endurance = user.getStats().getEndurance();
+        dto.agility = user.getStats().getAgility();
+        dto.intelligence = user.getStats().getIntelligence();
 
         return dto;
     }

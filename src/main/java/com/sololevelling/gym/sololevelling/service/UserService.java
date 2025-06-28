@@ -24,7 +24,6 @@ import com.sololevelling.gym.sololevelling.repo.RoleRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -84,12 +84,15 @@ public class UserService implements UserDetailsService {
         if (!encoder.matches(req.password, user.getPassword())) {
             throw new BadCredentialsException("Invalid password");
         }
+        deleteAccessTokensForUser(user);
+        refreshTokenRepo.deleteByUser(user);
         String jwt = jwtUtil.generateToken(user.getEmail());
         saveAccessToken(jwt, user);
         RefreshToken refresh = createRefreshToken(user);
 
         return new AuthResponse(jwt, refresh.getToken());
     }
+
     public RefreshToken createRefreshToken(User user) {
         refreshTokenRepo.deleteByUser(user); // Remove existing
         RefreshToken token = new RefreshToken();
@@ -165,6 +168,18 @@ public class UserService implements UserDetailsService {
 
         userRepo.save(user);
         return userMapper.toDto(user);
+    }
+
+    public void logoutUser(String token) {
+        String email = jwtUtil.extractUsername(token);
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        deleteAccessTokensForUser(user);
+        refreshTokenRepo.deleteByUser(user);
+
+        user.setLastLogout(LocalDateTime.now());
+        userRepo.save(user);
     }
 
 }

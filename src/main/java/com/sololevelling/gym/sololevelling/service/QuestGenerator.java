@@ -12,7 +12,6 @@ package com.sololevelling.gym.sololevelling.service;
 
 import com.sololevelling.gym.sololevelling.model.Quest;
 import com.sololevelling.gym.sololevelling.model.User;
-import com.sololevelling.gym.sololevelling.model.UserQuest;
 import com.sololevelling.gym.sololevelling.repo.QuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserQuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
@@ -21,10 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.*;
-import java.util.Random;
-import java.util.UUID;
 
 @Component
 public class QuestGenerator {
@@ -56,7 +52,7 @@ public class QuestGenerator {
 
         for (User user : users) {
             for (Quest template : dailyQuestsTemplate) {
-                Quest userQuest = createQuest(template.getTitle(),template.getDescription(),template.getExperienceReward(), template.isDaily());
+                Quest userQuest = createQuest(template.getTitle(), template.getDescription(), template.getExperienceReward(), template.isDaily());
                 userQuest.setUser(user);
                 questsToSave.add(userQuest);
             }
@@ -76,7 +72,7 @@ public class QuestGenerator {
         List<Quest> personalizedQuests = new ArrayList<>();
 
         for (Quest template : selectedTemplates) {
-            Quest clone = createQuest(template.getTitle(),template.getDescription(),template.getExperienceReward(), template.isDaily());
+            Quest clone = createQuest(template.getTitle(), template.getDescription(), template.getExperienceReward(), template.isDaily());
             clone.setUser(user);
             personalizedQuests.add(clone);
         }

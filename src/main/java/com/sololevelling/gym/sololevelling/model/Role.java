@@ -1,16 +1,18 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
 
 package com.sololevelling.gym.sololevelling.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.Data;
 
 @Entity

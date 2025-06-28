@@ -2,7 +2,6 @@ package com.sololevelling.gym.sololevelling.service;
 
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
-import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 @Service

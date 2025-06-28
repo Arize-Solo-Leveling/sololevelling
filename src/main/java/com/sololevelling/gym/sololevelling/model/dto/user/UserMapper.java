@@ -13,7 +13,6 @@ package com.sololevelling.gym.sololevelling.model.dto.user;
 import com.sololevelling.gym.sololevelling.model.Quest;
 import com.sololevelling.gym.sololevelling.model.Stats;
 import com.sololevelling.gym.sololevelling.model.User;
-import com.sololevelling.gym.sololevelling.model.dto.inventory.InventoryItemDto;
 import com.sololevelling.gym.sololevelling.model.dto.inventory.ItemSummaryDto;
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestSummaryDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutSummaryDto;

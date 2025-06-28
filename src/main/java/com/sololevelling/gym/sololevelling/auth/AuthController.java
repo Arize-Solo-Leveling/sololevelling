@@ -16,6 +16,7 @@ import com.sololevelling.gym.sololevelling.model.dto.auth.TokenRefreshRequest;
 import com.sololevelling.gym.sololevelling.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,10 +45,17 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(userService.loginUser(request));
     }
-    @PostMapping("/refresh")
 
+    @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody TokenRefreshRequest request) {
         String newToken = userService.refreshAccessToken(request.refreshToken);
         return ResponseEntity.ok(Map.of("accessToken", newToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+        userService.logoutUser(token);
+        return ResponseEntity.ok("Logged out successfully");
     }
 }
