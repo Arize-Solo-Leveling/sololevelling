@@ -22,6 +22,7 @@ import com.sololevelling.gym.sololevelling.repo.AccessTokenRepository;
 import com.sololevelling.gym.sololevelling.repo.RefreshTokenRepository;
 import com.sololevelling.gym.sololevelling.repo.RoleRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import com.sololevelling.gym.sololevelling.util.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -57,11 +58,14 @@ public class UserService implements UserDetailsService {
     private AccessTokenRepository accessTokenRepo;
     @Autowired
     private RoleRepository roleRepo;
+    @Autowired
+    private PasswordValidator passwordValidator;
 
     public String registerUser(AuthRequest req) {
         if (userRepo.existsByEmail(req.email)) {
             throw new IllegalArgumentException("Email already registered");
         }
+        passwordValidator.validate(req.password);
         Role userRole = roleRepo.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
         User user = new User();
@@ -81,11 +85,23 @@ public class UserService implements UserDetailsService {
         User user = userRepo.findByEmail(req.email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        if (user.isLocked()) {
+            throw new BadCredentialsException("Account is locked. Try again at: " + user.getLockoutUntil());
+        }
+
         if (!encoder.matches(req.password, user.getPassword())) {
+            user.incrementFailedAttempts();
+            userRepo.save(user);  // Save the updated attempt count and lock time
             throw new BadCredentialsException("Invalid password");
         }
+
+        // Successful login: reset failed attempts
+        user.resetFailedAttempts();
+        userRepo.save(user);
+
         deleteAccessTokensForUser(user);
         refreshTokenRepo.deleteByUser(user);
+
         String jwt = jwtUtil.generateToken(user.getEmail());
         saveAccessToken(jwt, user);
         RefreshToken refresh = createRefreshToken(user);

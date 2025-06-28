@@ -57,6 +57,26 @@ public class User {
 
     private LocalDateTime lastLogout;
 
+    private int failedLoginAttempts = 0;
+
+    private LocalDateTime lockoutUntil;
+
+    public boolean isLocked() {
+        return lockoutUntil != null && lockoutUntil.isAfter(LocalDateTime.now());
+    }
+
+    public void incrementFailedAttempts() {
+        failedLoginAttempts++;
+        if (failedLoginAttempts >= 5) {
+            lockoutUntil = LocalDateTime.now().plusMinutes(5);
+        }
+    }
+
+    public void resetFailedAttempts() {
+        failedLoginAttempts = 0;
+        lockoutUntil = null;
+    }
+
     public void completeQuest(Quest quest) {
         if (!this.quests.contains(quest)) {
             this.quests.add(quest);
