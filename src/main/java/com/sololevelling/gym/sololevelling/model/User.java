@@ -61,7 +61,6 @@ public class User {
     public void completeQuest(Quest quest) {
         if (!this.completedQuests.contains(quest)) {
             this.completedQuests.add(quest);
-            this.experience += quest.getExperienceReward();
         }
     }
 

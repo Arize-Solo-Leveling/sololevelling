@@ -42,6 +42,8 @@ public class QuestService {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ExperienceService experienceService;
 
     public List<QuestDto> getAvailableQuests(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
@@ -67,7 +69,7 @@ public class QuestService {
         inventoryItemRepository.save(rewardItem);
         user.completeQuest(quest);
         userRepo.save(user);
-        userService.addExperience(user, quest.getExperienceReward());
+        experienceService.addExperience(user, quest.getExperienceReward());
         return "Quest completed. EXP +" + quest.getExperienceReward();
     }
 

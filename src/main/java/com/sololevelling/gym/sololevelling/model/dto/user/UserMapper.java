@@ -10,12 +10,27 @@
 
 package com.sololevelling.gym.sololevelling.model.dto.user;
 
+import com.sololevelling.gym.sololevelling.model.Stats;
 import com.sololevelling.gym.sololevelling.model.User;
+import com.sololevelling.gym.sololevelling.model.dto.inventory.InventoryItemDto;
+import com.sololevelling.gym.sololevelling.model.dto.inventory.ItemSummaryDto;
+import com.sololevelling.gym.sololevelling.model.dto.quest.QuestSummaryDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutSummaryDto;
+import com.sololevelling.gym.sololevelling.service.ExperienceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.IntStream;
 
 @Component
 public class UserMapper {
+    private final ExperienceService experienceService;
+
+    @Autowired
+    public UserMapper(ExperienceService experienceService) {
+        this.experienceService = experienceService;
+    }
+
     public UserDto toDto(User user) {
         UserDto dto = new UserDto();
         dto.id = user.getId();
@@ -33,8 +48,35 @@ public class UserMapper {
             workoutSummaryDto.exercises = workout.getExercises().size();
             return workoutSummaryDto;
         }).toList();
-        dto.inventory = user.getInventory();
-        dto.completedQuests = user.getCompletedQuests();
+        ExperienceService.ExperienceProgress progress = experienceService.getExperienceProgress(user);
+        dto.totalExperienceEarned = progress.totalExpEarned();
+        dto.experienceToNextLevel = progress.expForNextLevel();
+        dto.inventory = user.getInventory().stream().map(item -> {
+            ItemSummaryDto itemSummaryDto = new ItemSummaryDto();
+            itemSummaryDto.id = item.getId();
+            itemSummaryDto.name = item.getName();
+
+            Stats stats = item.getStatBoosts();
+            itemSummaryDto.totalPoints = IntStream.of(
+                    stats.getStrength(),
+                    stats.getEndurance(),
+                    stats.getAgility(),
+                    stats.getIntelligence(),
+                    stats.getLuck()
+            ).sum();
+
+            return itemSummaryDto;
+        }).toList();
+
+        dto.completedQuests = user.getCompletedQuests().stream().map(quest -> {
+            QuestSummaryDto questSummaryDto = new QuestSummaryDto();
+            questSummaryDto.id = quest.getId();
+            questSummaryDto.title = quest.getTitle();
+            questSummaryDto.experienceReward = quest.getExperienceReward();
+            questSummaryDto.daily = quest.isDaily();
+            return questSummaryDto;
+        }).toList();
+
         return dto;
     }
 }

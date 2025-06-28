@@ -13,6 +13,8 @@ package com.sololevelling.gym.sololevelling.model.dto.user;
 import com.sololevelling.gym.sololevelling.model.InventoryItem;
 import com.sololevelling.gym.sololevelling.model.Quest;
 import com.sololevelling.gym.sololevelling.model.Stats;
+import com.sololevelling.gym.sololevelling.model.dto.inventory.ItemSummaryDto;
+import com.sololevelling.gym.sololevelling.model.dto.quest.QuestSummaryDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutSummaryDto;
 import lombok.Data;
 
@@ -30,7 +32,9 @@ public class UserDto {
     public int statPoints;
     public Stats stats;
     public String userClass;
-    public List<InventoryItem> inventory = new ArrayList<>();
+    public int totalExperienceEarned;
+    public int experienceToNextLevel;
+    public List<ItemSummaryDto> inventory = new ArrayList<>();
     public List<WorkoutSummaryDto> workouts = new ArrayList<>();
-    public List<Quest> completedQuests = new ArrayList<>();
+    public List<QuestSummaryDto> completedQuests = new ArrayList<>();
 }

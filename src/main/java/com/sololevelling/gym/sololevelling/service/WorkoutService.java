@@ -58,9 +58,9 @@ public class WorkoutService {
 
         workout.setExercises(exercises);
         workout.setTotalVolume(totalVolume);
-        workout.setExperienceGained((int) (totalVolume / 10));
+        workout.setExperienceGained((int) (totalVolume / 50));
 
-        user.setExperience((int) (totalVolume / 10));
+        user.setExperience(user.getExperience() + (int) (totalVolume / 50));
 
         workoutRepo.save(workout);
         exerciseRepo.saveAll(exercises);

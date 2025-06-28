@@ -88,7 +88,7 @@ public class UserService implements UserDetailsService {
         saveAccessToken(jwt, user);
         RefreshToken refresh = createRefreshToken(user);
 
-        return new AuthResponse(jwt,refresh.getToken());
+        return new AuthResponse(jwt, refresh.getToken());
     }
     public RefreshToken createRefreshToken(User user) {
         refreshTokenRepo.deleteByUser(user); // Remove existing
@@ -102,7 +102,7 @@ public class UserService implements UserDetailsService {
     @Transactional
     public String refreshAccessToken(String refreshToken) {
         Optional<RefreshToken> token = refreshTokenRepo.findByToken(refreshToken);
-        User user=token.get().getUser();
+        User user = token.get().getUser();
         deleteAccessTokensForUser(user);
         String newAccessToken = jwtUtil.generateToken(user.getEmail());
         saveAccessToken(newAccessToken, user);
@@ -165,48 +165,6 @@ public class UserService implements UserDetailsService {
 
         userRepo.save(user);
         return userMapper.toDto(user);
-    }
-
-    public void addExperience(User user, int expGained) {
-        int exp = user.getExperience() + expGained;
-        int level = user.getLevel();
-
-        while (exp >= getExpForNextLevel(level)) {
-            exp -= getExpForNextLevel(level);
-            level++;
-            user.setStatPoints(user.getStatPoints() + 5); // Grant 5 points on level up
-        }
-
-        user.setExperience(exp);
-        user.setLevel(level);
-        userRepo.save(user);
-    }
-
-    private int getExpForNextLevel(int level) {
-        int exp = 100;
-
-        for (int i = 1; i < level; i++) {
-            int growthRate;
-
-            if (i <= 5) {
-                growthRate = 50;
-            } else if (i <= 10) {
-                growthRate = 45;
-            } else if (i <= 20) {
-                growthRate = 40;
-            } else if (i <= 30) {
-                growthRate = 30;
-            } else if (i <= 40) {
-                growthRate = 20;
-            } else if (i <= 50) {
-                growthRate = 10;
-            } else {
-                growthRate = 5;
-            }
-            exp = exp + (exp * growthRate / 100);
-        }
-
-        return exp;
     }
 
 }

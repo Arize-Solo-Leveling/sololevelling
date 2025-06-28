@@ -42,6 +42,8 @@ public class DungeonService {
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private ExperienceService experienceService;
 
 
     public List<DungeonDto> getAvailableDungeons(String email) {
@@ -79,7 +81,7 @@ public class DungeonService {
             inventoryItemRepository.save(reward);
             dungeonRepository.save(dungeon);
             userRepository.save(user);
-            userService.addExperience(user, dungeon.getExpReward());
+            experienceService.addExperience(user, dungeon.getExpReward());
 
             return DungeonMapper.toDto(dungeon);
         } else {
