@@ -137,6 +137,7 @@ public class UserService implements UserDetailsService {
         accessTokenRepo.save(accessToken);
     }
 
+    @Transactional
     public void deleteAccessTokensForUser(User user) {
         accessTokenRepo.deleteByUser(user);
     }
