@@ -23,6 +23,7 @@ import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import com.sololevelling.gym.sololevelling.util.StatsLowException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +41,6 @@ public class DungeonService {
     private UserRepository userRepository;
     @Autowired
     private InventoryItemRepository inventoryItemRepository;
-    @Autowired
-    private UserService userService;
     @Autowired
     private ExperienceService experienceService;
 
@@ -173,6 +172,19 @@ public class DungeonService {
 
         item.setStatBoosts(stats);
         return item;
+    }
+
+    public List<Dungeon> getAllDungeons() {
+        return dungeonRepository.findAll();
+    }
+
+    public Dungeon getDungeonById(Long id) {
+        return dungeonRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dungeon not found"));
+    }
+
+    public void deleteDungeonById(Long id) {
+        dungeonRepository.deleteById(id);
     }
 
 }

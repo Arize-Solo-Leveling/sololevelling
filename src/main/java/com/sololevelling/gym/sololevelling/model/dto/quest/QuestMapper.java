@@ -12,9 +12,11 @@ package com.sololevelling.gym.sololevelling.model.dto.quest;
 
 import com.sololevelling.gym.sololevelling.model.Quest;
 import com.sololevelling.gym.sololevelling.model.User;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+@Component
 public class QuestMapper {
     public static QuestDto toDto(Quest quest, User user) {
         QuestDto dto = new QuestDto();

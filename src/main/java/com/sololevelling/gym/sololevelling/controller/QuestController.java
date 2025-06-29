@@ -10,9 +10,7 @@
 
 package com.sololevelling.gym.sololevelling.controller;
 
-import com.sololevelling.gym.sololevelling.model.dto.quest.CreateQuestRequest;
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestDto;
-import com.sololevelling.gym.sololevelling.service.QuestGenerator;
 import com.sololevelling.gym.sololevelling.service.QuestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +27,6 @@ public class QuestController {
 
     @Autowired
     private QuestService questService;
-    @Autowired
-    private QuestGenerator questGenerator;
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
@@ -56,17 +52,4 @@ public class QuestController {
     public ResponseEntity<?> getQuestHistory(Principal principal) {
         return ResponseEntity.ok(questService.getQuestHistory(principal.getName()));
     }
-
-    @PostMapping("/{userId}/create")
-    @PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
-    public ResponseEntity<?> createQuest(@RequestBody CreateQuestRequest request, @PathVariable UUID userId) {
-        return ResponseEntity.ok(questService.createQuest(request, userId));
-    }
-
-    @PostMapping("/{userId}/generate")
-    @PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
-    public ResponseEntity<?> createRandomQuest(@PathVariable UUID userId) {
-        return ResponseEntity.ok(questGenerator.pickRandomDailyQuests(userId));
-    }
-
 }

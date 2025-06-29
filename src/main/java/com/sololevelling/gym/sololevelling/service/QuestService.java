@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -42,6 +43,8 @@ public class QuestService {
     private UserRepository userRepository;
     @Autowired
     private ExperienceService experienceService;
+    @Autowired
+    private QuestRepository questRepository;
 
     public List<QuestDto> getAvailableQuests(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
@@ -160,5 +163,22 @@ public class QuestService {
                 .map(quest -> QuestMapper.toDto(quest, user))
                 .toList();
     }
+
+    public List<Quest> getAllQuests() {
+        return questRepository.findAll();
+    }
+
+
+    public Optional<Quest> getQuestById(UUID id) {
+        return questRepository.findById(id);
+    }
+
+    public void deleteQuest(UUID id) throws Exception {
+        if (!questRepository.existsById(id)) {
+            throw new Exception("Quest not found");
+        }
+        questRepository.deleteById(id);
+    }
+
 
 }

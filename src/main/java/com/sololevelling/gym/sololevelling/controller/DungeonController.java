@@ -12,11 +12,9 @@ package com.sololevelling.gym.sololevelling.controller;
 
 import com.sololevelling.gym.sololevelling.model.Dungeon;
 import com.sololevelling.gym.sololevelling.model.User;
-import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonRequest;
 import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.service.DungeonService;
-import com.sololevelling.gym.sololevelling.service.WeeklyDungeonService;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import com.sololevelling.gym.sololevelling.util.StatsLowException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.UUID;
 
 
 @RestController
@@ -39,8 +36,6 @@ public class DungeonController {
     private UserRepository userRepo;
     @Autowired
     private DungeonRepository dungeonRepo;
-    @Autowired
-    private WeeklyDungeonService weeklyDungeonService;
 
     @GetMapping
     @PreAuthorize("hasRole('USER')")
@@ -68,15 +63,4 @@ public class DungeonController {
         return ResponseEntity.ok(dungeonService.getDungeonHistory(principal.getName()));
     }
 
-    @PostMapping("/{userId}/create")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createDungeon(@RequestBody DungeonRequest request, @PathVariable UUID userId) {
-        return ResponseEntity.ok(dungeonService.createDungeonForUser(request, userId));
-    }
-
-    @PostMapping("/{userId}/generate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> createRandomDungeon(@PathVariable UUID userId) {
-        return ResponseEntity.ok(weeklyDungeonService.pickRandomWeeklyDungeon(userId));
-    }
 }
