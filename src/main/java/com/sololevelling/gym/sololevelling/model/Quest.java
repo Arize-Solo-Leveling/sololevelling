@@ -26,7 +26,6 @@ public class Quest {
     private String title;
     private String description;
     private int experienceReward;
-    private boolean daily; // true = daily, false = weekly
     @Column(updatable = false)
     private LocalDateTime createdAt;
     @Column(updatable = false)

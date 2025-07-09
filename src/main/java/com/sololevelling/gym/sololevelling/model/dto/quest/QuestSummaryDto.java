@@ -16,5 +16,4 @@ public class QuestSummaryDto {
     public UUID id;
     public String title;
     public int experienceReward;
-    public boolean daily;
 }
