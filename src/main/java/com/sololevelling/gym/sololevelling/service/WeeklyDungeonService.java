@@ -77,7 +77,7 @@ public class WeeklyDungeonService {
             dungeonRepo.saveAll(userDungeons);
         }
 
-        System.out.println("✅ Weekly dungeons assigned to all users.");
+//        System.out.println("✅ Weekly dungeons assigned to all users.");
     }
 
     public List<Dungeon> pickRandomWeeklyDungeon(UUID userId) {
