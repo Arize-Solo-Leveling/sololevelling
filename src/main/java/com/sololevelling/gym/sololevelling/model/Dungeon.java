@@ -28,8 +28,6 @@ public class Dungeon {
     private String objective;
     private int expReward;
     private String lootReward;
-    @Column(name = "is_weekly", nullable = false)
-    private boolean weekly;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

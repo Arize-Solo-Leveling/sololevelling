@@ -49,14 +49,6 @@ public class DungeonController {
         return ResponseEntity.ok(dungeonService.attemptDungeon(dungeonId, principal.getName()));
     }
 
-    @GetMapping("/week")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getWeeklyDungeons(Principal principal) {
-        User user = userRepo.findByEmail(principal.getName()).orElseThrow();
-        List<Dungeon> weekly = dungeonRepo.findByUserAndWeeklyTrue(user);
-        return ResponseEntity.ok(weekly);
-    }
-
     @GetMapping("/history")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getDungeonHistory(Principal principal) {

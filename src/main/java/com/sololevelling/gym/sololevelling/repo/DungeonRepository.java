@@ -23,6 +23,4 @@ public interface DungeonRepository extends JpaRepository<Dungeon, Long> {
 
     List<Dungeon> findByUserAndCompletedFalse(User user);
 
-    List<Dungeon> findByUserAndWeeklyTrue(User user);
-
 }

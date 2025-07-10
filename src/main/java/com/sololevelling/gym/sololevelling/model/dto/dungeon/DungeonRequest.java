@@ -19,6 +19,5 @@ public class DungeonRequest {
     private String objective;
     private int expReward;
     private String lootReward;
-    private boolean weekly;
     // Getters and Setters
 }

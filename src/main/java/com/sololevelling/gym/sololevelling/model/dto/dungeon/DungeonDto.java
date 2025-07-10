@@ -18,6 +18,5 @@ public class DungeonDto {
     public int expReward;
     public String lootReward;
     public boolean completed;
-    public boolean isWeekly;
     public boolean expired;
 }

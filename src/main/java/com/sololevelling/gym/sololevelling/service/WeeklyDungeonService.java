@@ -28,39 +28,38 @@ import java.util.UUID;
 public class WeeklyDungeonService {
 
     private final List<Dungeon> baseWeeklyDungeons = List.of(
-            createBaseDungeon("HIIT Gauntlet", "endurance", "Complete 5 HIIT rounds", 150, "Sweat Band", true),
-            createBaseDungeon("Agility Course", "agility", "Cone drills under 90s", 180, "Agility Shoes", true),
-            createBaseDungeon("Strength Pyramid", "strength", "Max reps of squats & bench", 100, "Power Vest", true),
-            createBaseDungeon("Core Crusher", "strength", "Complete 100 sit-ups", 100, "Ab Belt", true),
-            createBaseDungeon("Upper Body Blitz", "strength", "Do 50 push-ups and 30 pull-ups", 140, "Arm Straps", true),
-            createBaseDungeon("Lower Body Burn", "strength", "Perform 100 lunges and 100 squats", 160, "Leg Wraps", true),
-            createBaseDungeon("Speed Sprint", "agility", "Sprint 200 meters × 5 rounds", 120, "Speed Shoes", false),
-            createBaseDungeon("Yoga Flow", "mobility", "Complete a 30-minute yoga session", 80, "Flex Band", false),
-            createBaseDungeon("Cardio King", "endurance", "Burn 500 calories in one workout", 180, "Heart Monitor", true),
-            createBaseDungeon("Recovery Dungeon", "recovery", "Do foam rolling & deep stretch for 20 min", 60, "Recovery Roller", true),
-            createBaseDungeon("Plyometric Madness", "power", "50 jump squats, 50 box jumps, 25 burpees", 170, "Jump Trainer", true),
-            createBaseDungeon("Balance Challenge", "stability", "Hold 1-minute single-leg stance each leg + BOSU drills", 90, "Balance Pads", false)
+            createBaseDungeon("HIIT Gauntlet", "endurance", "Complete 5 HIIT rounds", 150, "Sweat Band"),
+            createBaseDungeon("Agility Course", "agility", "Cone drills under 90s", 180, "Agility Shoes"),
+            createBaseDungeon("Strength Pyramid", "strength", "Max reps of squats & bench", 100, "Power Vest"),
+            createBaseDungeon("Core Crusher", "strength", "Complete 100 sit-ups", 100, "Ab Belt"),
+            createBaseDungeon("Upper Body Blitz", "strength", "Do 50 push-ups and 30 pull-ups", 140, "Arm Straps"),
+            createBaseDungeon("Lower Body Burn", "strength", "Perform 100 lunges and 100 squats", 160, "Leg Wraps"),
+            createBaseDungeon("Speed Sprint", "agility", "Sprint 200 meters × 5 rounds", 120, "Speed Shoes"),
+            createBaseDungeon("Yoga Flow", "mobility", "Complete a 30-minute yoga session", 80, "Flex Band"),
+            createBaseDungeon("Cardio King", "endurance", "Burn 500 calories in one workout", 180, "Heart Monitor"),
+            createBaseDungeon("Recovery Dungeon", "recovery", "Do foam rolling & deep stretch for 20 min", 60, "Recovery Roller"),
+            createBaseDungeon("Plyometric Madness", "power", "50 jump squats, 50 box jumps, 25 burpees", 170, "Jump Trainer"),
+            createBaseDungeon("Balance Challenge", "stability", "Hold 1-minute single-leg stance each leg + BOSU drills", 90, "Balance Pads")
     );
     @Autowired
     private DungeonRepository dungeonRepo;
     @Autowired
     private UserRepository userRepo;
 
-    private static Dungeon createBaseDungeon(String name, String type, String objective, int exp, String loot, boolean weekly) {
+    private static Dungeon createBaseDungeon(String name, String type, String objective, int exp, String loot) {
         Dungeon d = new Dungeon();
-        dungeonUSerHelper(name, type, objective, exp, loot, weekly, d);
+        dungeonUSerHelper(name, type, objective, exp, loot, d);
         d.setCreatedAt(LocalDateTime.now());
-        d.setExpiresAt(weekly ? d.getCreatedAt().plusWeeks(1) : d.getCreatedAt().plusDays(1));
+        d.setExpiresAt(d.getCreatedAt().plusWeeks(1));
         return d;
     }
 
-    static void dungeonUSerHelper(String name, String type, String objective, int expReward, String lootReward, boolean weekly, Dungeon clone) {
+    static void dungeonUSerHelper(String name, String type, String objective, int expReward, String lootReward, Dungeon clone) {
         clone.setName(name);
         clone.setType(type);
         clone.setObjective(objective);
         clone.setExpReward(expReward);
         clone.setLootReward(lootReward);
-        clone.setWeekly(weekly);
         clone.setCompleted(false);
     }
 
@@ -70,7 +69,6 @@ public class WeeklyDungeonService {
 
         for (User user : users) {
             List<Dungeon> userDungeons = baseWeeklyDungeons.stream()
-                    .filter(Dungeon::isWeekly)
                     .map(base -> cloneDungeonForUser(base, user))
                     .toList();
 
@@ -97,11 +95,9 @@ public class WeeklyDungeonService {
     }
 
     private Dungeon cloneDungeonForUser(Dungeon template, User user) {
-        dungeonUSerHelper(template.getName(), template.getType(), template.getObjective(), template.getExpReward(), template.getLootReward(), template.isWeekly(), template);
+        dungeonUSerHelper(template.getName(), template.getType(), template.getObjective(), template.getExpReward(), template.getLootReward(), template);
         template.setCreatedAt(LocalDateTime.now());
-        template.setExpiresAt(template.isWeekly()
-                ? template.getCreatedAt().plusWeeks(1)
-                : template.getCreatedAt().plusDays(1));
+        template.setExpiresAt(template.getCreatedAt().plusWeeks(1));
         template.setUser(user);
         return template;
     }

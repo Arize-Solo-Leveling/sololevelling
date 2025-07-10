@@ -97,14 +97,9 @@ public class DungeonService {
         dungeon.setObjective(request.getObjective());
         dungeon.setExpReward(request.getExpReward());
         dungeon.setLootReward(request.getLootReward());
-        dungeon.setWeekly(request.isWeekly());
         dungeon.setCompleted(false);
         dungeon.setCreatedAt(LocalDateTime.now());
-        if (request.isWeekly()) {
-            dungeon.setExpiresAt(dungeon.getCreatedAt().plusWeeks(1));
-        } else {
-            dungeon.setExpiresAt(dungeon.getCreatedAt().plusDays(1));
-        }
+        dungeon.setExpiresAt(dungeon.getCreatedAt().plusWeeks(1));
         dungeon.setUser(user);
 
         return dungeonRepository.save(dungeon);
