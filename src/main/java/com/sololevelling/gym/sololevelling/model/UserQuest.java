@@ -11,31 +11,31 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import lombok.Data;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
-@Entity
+@Document
 @Data
 public class UserQuest {
     @Id
-    @GeneratedValue
-    private UUID id;
+    private ObjectId id;
 
-    @ManyToOne
+    @DBRef
+    @ToString.Exclude
     @JsonIgnore
     private User user;
 
-    @ManyToOne
+    @DBRef
+    @ToString.Exclude
     @JsonIgnore
     private Quest quest;
 
     private boolean completed;
-
     private LocalDateTime assignedAt;
 }

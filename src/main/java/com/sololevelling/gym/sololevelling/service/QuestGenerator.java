@@ -12,15 +12,21 @@ package com.sololevelling.gym.sololevelling.service;
 
 import com.sololevelling.gym.sololevelling.model.Quest;
 import com.sololevelling.gym.sololevelling.model.User;
+import com.sololevelling.gym.sololevelling.model.dto.quest.QuestDto;
+import com.sololevelling.gym.sololevelling.model.dto.quest.QuestMapper;
 import com.sololevelling.gym.sololevelling.repo.QuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserQuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 @Component
 public class QuestGenerator {
@@ -61,7 +67,7 @@ public class QuestGenerator {
         questRepo.saveAll(questsToSave);
     }
 
-    public List<Quest> pickRandomDailyQuests(UUID uuid) {
+    public List<QuestDto> pickRandomDailyQuests(ObjectId uuid) {
         List<Quest> allTemplates = new ArrayList<>(newQuests);
 
         Collections.shuffle(allTemplates);
@@ -76,8 +82,11 @@ public class QuestGenerator {
             clone.setUser(user);
             personalizedQuests.add(clone);
         }
+        List<Quest> saved = questRepo.saveAll(personalizedQuests);
 
-        return questRepo.saveAll(personalizedQuests);
+        return saved.stream()
+                .map(q -> QuestMapper.toDto(q, user))
+                .toList();
     }
 
 

@@ -21,13 +21,13 @@ import com.sololevelling.gym.sololevelling.repo.ExerciseRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.repo.WorkoutRepository;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class WorkoutService {
@@ -42,39 +42,58 @@ public class WorkoutService {
     public WorkoutDto submitWorkout(WorkoutRequest request, String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
 
+        // 1. Create and save workout first (without exercises)
         Workout workout = new Workout();
         workout.setName(request.name);
         workout.setUser(user);
         workout.setDate(LocalDateTime.now());
+        workout.setTotalVolume(0);
+        workout.setExperienceGained(0);
+        workout.setExercises(new ArrayList<>()); // init empty list
+        workout = workoutRepo.save(workout); // now workout has _id
 
+        // 2. Now that workout has ID, safely create exercises
         double totalVolume = 0;
         List<Exercise> exercises = new ArrayList<>();
+
         for (ExerciseRequest e : request.exercises) {
             double volume = e.sets * e.reps * e.weight;
             totalVolume += volume;
-            Exercise ex = new Exercise(e.name, e.sets, e.reps, e.weight, workout);
+
+            Exercise ex = new Exercise();
+            ex.setName(e.name);
+            ex.setSets(e.sets);
+            ex.setReps(e.reps);
+            ex.setWeight(e.weight);
+            ex.setWorkout(workout); // workout now has _id
             exercises.add(ex);
         }
 
+        // 3. Save exercises
+        exerciseRepo.saveAll(exercises);
+
+        // 4. Update workout with exercise list and volume
         workout.setExercises(exercises);
         workout.setTotalVolume(totalVolume);
-        workout.setExperienceGained((int) (totalVolume / 50));
+        int xp = (int) (totalVolume / 50);
+        workout.setExperienceGained(xp);
+        workoutRepo.save(workout); // re-save updated workout
 
-        user.setExperience(user.getExperience() + (int) (totalVolume / 50));
-
-        workoutRepo.save(workout);
-        exerciseRepo.saveAll(exercises);
+        // 5. Update user XP
+        user.setExperience(user.getExperience() + xp);
+        user.setWorkouts(List.of(workout));
         userRepository.save(user);
 
         return WorkoutMapper.toDto(workout);
     }
+
 
     public List<WorkoutDto> getWorkoutHistory(String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
         return workoutRepo.findByUser(user).stream().map(WorkoutMapper::toDto).toList();
     }
 
-    public WorkoutDto getWorkoutDetail(UUID id, String email) throws AccessDeniedException {
+    public WorkoutDto getWorkoutDetail(ObjectId id, String email) throws AccessDeniedException {
         Workout workout = workoutRepo.findById(id).orElseThrow();
         if (!workout.getUser().getEmail().equals(email)) throw new AccessDeniedException("Not your workout");
         return WorkoutMapper.toDto(workout);

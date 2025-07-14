@@ -8,11 +8,10 @@
 
  */
 
-package com.sololevelling.gym.sololevelling.model.dto.admin;
 
-import lombok.Data;
+package com.sololevelling.gym.sololevelling.util;
 
-@Data
-public class RoleUpdateRequest {
-    private String role;  // e.g., "ADMIN", "USER", "MODERATOR"
+public class DungeonNotFoundException extends Throwable {
+    public DungeonNotFoundException(String dungeonNotFound) {
+    }
 }

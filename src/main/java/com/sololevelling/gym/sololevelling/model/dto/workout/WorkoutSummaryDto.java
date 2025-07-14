@@ -10,10 +10,10 @@
 
 package com.sololevelling.gym.sololevelling.model.dto.workout;
 
-import java.util.UUID;
+import org.bson.types.ObjectId;
 
 public class WorkoutSummaryDto {
-    public UUID id;
+    public ObjectId id;
     public String name;
     public int exercises;
 }

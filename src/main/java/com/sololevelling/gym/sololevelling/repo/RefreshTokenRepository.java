@@ -12,14 +12,14 @@ package com.sololevelling.gym.sololevelling.repo;
 
 import com.sololevelling.gym.sololevelling.model.RefreshToken;
 import com.sololevelling.gym.sololevelling.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
+public interface RefreshTokenRepository extends MongoRepository<RefreshToken, ObjectId> {
     Optional<RefreshToken> findByToken(String token);
 
     void deleteByUser(User user);
