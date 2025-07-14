@@ -14,7 +14,5 @@ import com.sololevelling.gym.sololevelling.model.UserQuest;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.UUID;
-
 public interface UserQuestRepository extends MongoRepository<UserQuest, ObjectId> {
 }

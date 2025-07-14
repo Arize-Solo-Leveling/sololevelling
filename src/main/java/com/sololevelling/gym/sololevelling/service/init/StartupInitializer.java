@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -78,7 +78,7 @@ public class StartupInitializer implements CommandLineRunner {
             admin.setEmail(email);
             admin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
             admin.setRoles(Set.of(
-                roleRepository.findByName("ROLE_ADMIN").orElseThrow()
+                    roleRepository.findByName("ROLE_ADMIN").orElseThrow()
             ));
             admin.setLevel(99);
             admin.setExperience(999999);

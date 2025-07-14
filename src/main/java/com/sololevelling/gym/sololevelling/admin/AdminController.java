@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -26,7 +26,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin")

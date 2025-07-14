@@ -26,14 +26,12 @@ import com.sololevelling.gym.sololevelling.util.DungeonNotFoundException;
 import com.sololevelling.gym.sololevelling.util.StatsLowException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 public class DungeonService {
