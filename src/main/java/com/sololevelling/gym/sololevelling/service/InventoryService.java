@@ -16,6 +16,7 @@ import com.sololevelling.gym.sololevelling.model.dto.inventory.InventoryItemDto;
 import com.sololevelling.gym.sololevelling.model.dto.inventory.InventoryItemMapper;
 import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +37,7 @@ public class InventoryService {
                 .toList();
     }
 
-    public String equipItem(String email, Long itemId) {
+    public String equipItem(String email, ObjectId itemId) {
         User user = userRepository.findByEmail(email).orElseThrow();
         InventoryItem item = itemRepository.findById(itemId).orElseThrow();
 
@@ -56,11 +57,12 @@ public class InventoryService {
         item.setEquipped(true);
         user.addStats(item.getStatBoosts());
 
+        itemRepository.save(item);
         userRepository.save(user);
         return "Item equipped!";
     }
 
-    public String unequipItem(String email, Long itemId) {
+    public String unequipItem(String email, ObjectId itemId) {
         User user = userRepository.findByEmail(email).orElseThrow();
         InventoryItem item = itemRepository.findById(itemId).orElseThrow();
 
@@ -70,6 +72,7 @@ public class InventoryService {
 
         item.setEquipped(false);
         user.subtractStats(item.getStatBoosts());
+        itemRepository.save(item);
         userRepository.save(user);
         return "Item unequipped.";
     }

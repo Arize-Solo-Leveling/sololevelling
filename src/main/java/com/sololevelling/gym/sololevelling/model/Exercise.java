@@ -11,25 +11,26 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import lombok.Data;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
+@Document
 @Data
 public class Exercise {
     @Id
-    @GeneratedValue
-    private Long id;
+    private ObjectId id;
 
     private String name;
     private int sets;
     private int reps;
     private double weight;
 
-    @ManyToOne
+    @DBRef
+    @ToString.Exclude
     @JsonIgnore
     private Workout workout;
 

@@ -22,12 +22,15 @@ import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
+import com.sololevelling.gym.sololevelling.util.DungeonNotFoundException;
 import com.sololevelling.gym.sololevelling.util.StatsLowException;
-import jakarta.persistence.EntityNotFoundException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -51,7 +54,7 @@ public class DungeonService {
         return dungeons.stream().map(DungeonMapper::toDto).toList();
     }
 
-    public DungeonDto attemptDungeon(Long dungeonId, String email) throws AccessDeniedException, StatsLowException {
+    public DungeonDto attemptDungeon(ObjectId dungeonId, String email) throws AccessDeniedException, StatsLowException {
         User user = userRepository.findByEmail(email).orElseThrow();
         Dungeon dungeon = dungeonRepository.findById(dungeonId).orElseThrow();
 
@@ -76,6 +79,12 @@ public class DungeonService {
                 case InventoryRarity.LEGENDARY -> 10;
                 default -> 0;
             };
+            List<InventoryItem> currentInventory = user.getInventory();
+            if (currentInventory == null) {
+                currentInventory = new ArrayList<>();
+            }
+            currentInventory.add(reward);
+            user.setInventory(currentInventory);
             user.setStatPoints(user.getStatPoints() + bonusStatPoints);
             inventoryItemRepository.save(reward);
             dungeonRepository.save(dungeon);
@@ -88,7 +97,7 @@ public class DungeonService {
         }
     }
 
-    public Dungeon createDungeonForUser(DungeonRequest request, UUID uuid) {
+    public Dungeon createDungeonForUser(DungeonRequest request, ObjectId uuid) {
         User user = userRepository.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
 
         Dungeon dungeon = new Dungeon();
@@ -178,12 +187,12 @@ public class DungeonService {
         return dungeonRepository.findAll();
     }
 
-    public Dungeon getDungeonById(Long id) {
+    public Dungeon getDungeonById(ObjectId id) throws DungeonNotFoundException {
         return dungeonRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Dungeon not found"));
+                .orElseThrow(() -> new DungeonNotFoundException("Dungeon not found"));
     }
 
-    public void deleteDungeonById(Long id) {
+    public void deleteDungeonById(ObjectId id) {
         dungeonRepository.deleteById(id);
     }
 

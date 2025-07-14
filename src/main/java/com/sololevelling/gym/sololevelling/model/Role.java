@@ -10,17 +10,15 @@
 
 package com.sololevelling.gym.sololevelling.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
-@Entity
+@Document
 @Data
 public class Role {
     @Id
-    @GeneratedValue
-    private Long id;
-
-    private String name; // e.g., "ROLE_USER", "ROLE_ADMIN"
+    private ObjectId id;
+    private String name;
 }

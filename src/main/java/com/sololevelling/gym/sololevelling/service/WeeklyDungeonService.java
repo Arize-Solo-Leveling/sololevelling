@@ -14,6 +14,7 @@ import com.sololevelling.gym.sololevelling.model.Dungeon;
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -80,7 +81,7 @@ public class WeeklyDungeonService {
         System.out.println("✅ Weekly dungeons assigned to all users.");
     }
 
-    public List<Dungeon> pickRandomWeeklyDungeon(UUID userId) {
+    public List<Dungeon> pickRandomWeeklyDungeon(ObjectId userId) {
         User user = userRepo.findById(userId).orElseThrow();
 
         List<Dungeon> shuffled = new java.util.ArrayList<>(baseWeeklyDungeons);

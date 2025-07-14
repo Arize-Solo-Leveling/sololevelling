@@ -13,6 +13,7 @@ package com.sololevelling.gym.sololevelling.controller;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutRequest;
 import com.sololevelling.gym.sololevelling.service.WorkoutService;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +43,7 @@ public class WorkoutController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getWorkoutDetail(@PathVariable UUID id, Principal principal) throws AccessDeniedException {
+    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id, Principal principal) throws AccessDeniedException {
         return ResponseEntity.ok(workoutService.getWorkoutDetail(id, principal.getName()));
     }
 }

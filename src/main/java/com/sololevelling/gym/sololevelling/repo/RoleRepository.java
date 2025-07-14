@@ -11,10 +11,12 @@
 package com.sololevelling.gym.sololevelling.repo;
 
 import com.sololevelling.gym.sololevelling.model.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface RoleRepository extends JpaRepository<Role, Long> {
+public interface RoleRepository extends MongoRepository<Role, ObjectId> {
+    boolean existsByName(String name);
     Optional<Role> findByName(String roleUser);
 }

@@ -10,27 +10,31 @@
 
 package com.sololevelling.gym.sololevelling.model;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Entity
+@Document
 @Data
 public class RefreshToken {
-
     @Id
-    @GeneratedValue
-    private UUID id;
+    private ObjectId id;
 
-    @Column(unique = true)
+    @Indexed(unique = true)
     private String token;
 
-    @OneToOne
+    @DBRef
+    @ToString.Exclude
+    @JsonIgnore
     private User user;
 
     private Instant expiryDate;
-
-    // Getters and setters
 }

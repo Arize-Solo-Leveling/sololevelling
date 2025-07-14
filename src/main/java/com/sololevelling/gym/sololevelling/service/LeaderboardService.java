@@ -26,14 +26,14 @@ public class LeaderboardService {
     private UserRepository userRepository;
 
     public List<LeaderboardEntryDto> getGlobalLeaderboard() {
-        return userRepository.findTopGlobalLeaderboard()
+        return userRepository.findTop10ByOrderByLevelDescExperienceDesc()
                 .stream()
                 .map(this::mapToDto)
                 .toList();
     }
 
     public List<LeaderboardEntryDto> getClassLeaderboard(UserClass userClass) {
-        return userRepository.findTopLeaderboardByClass(userClass)
+        return userRepository.findTop10ByUserClassOrderByLevelDescExperienceDesc(userClass)
                 .stream()
                 .map(this::mapToDto)
                 .toList();

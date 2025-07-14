@@ -12,26 +12,27 @@ package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sololevelling.gym.sololevelling.model.dto.inventory.InventoryRarity;
-import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
+@Document
 @Data
 public class InventoryItem {
     @Id
-    @GeneratedValue
-    private Long id;
+    private ObjectId id;
 
     private String name;
     private InventoryRarity rarity;
-    private String slot; // head, hands, etc.
-
-    @Embedded
+    private String slot;
     private Stats statBoosts;
-
     private boolean equipped = false;
 
-    @ManyToOne
+    @DBRef
+    @ToString.Exclude
     @JsonIgnore
     private User user;
 }

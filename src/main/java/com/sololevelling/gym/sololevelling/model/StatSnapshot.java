@@ -11,24 +11,22 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
-@Entity
+@Document
 @Data
 public class StatSnapshot {
     @Id
-    @GeneratedValue
-    private UUID id;
+    private ObjectId id;
 
     private LocalDate date;
-
     private int level;
     private int experience;
     private int strength;
@@ -37,8 +35,9 @@ public class StatSnapshot {
     private int intelligence;
     private int luck;
     private double volume;
-    @ManyToOne
+
+    @DBRef
+    @ToString.Exclude
     @JsonIgnore
     private User user;
-
 }

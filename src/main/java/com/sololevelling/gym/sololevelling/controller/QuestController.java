@@ -12,6 +12,7 @@ package com.sololevelling.gym.sololevelling.controller;
 
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestDto;
 import com.sololevelling.gym.sololevelling.service.QuestService;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +37,7 @@ public class QuestController {
 
     @PostMapping("/{questId}/complete")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> completeQuest(@PathVariable UUID questId, Principal principal) {
+    public ResponseEntity<?> completeQuest(@PathVariable ObjectId questId, Principal principal) {
         return ResponseEntity.ok(questService.completeQuest(questId, principal.getName()));
     }
 

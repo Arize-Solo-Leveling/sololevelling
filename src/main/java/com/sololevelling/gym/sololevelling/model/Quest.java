@@ -11,34 +11,34 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
+@Document
 @Data
 public class Quest {
     @Id
-    @GeneratedValue
-    private UUID id;
+    private ObjectId id;
+
     private String title;
     private String description;
     private int experienceReward;
-    private boolean daily; // true = daily, false = weekly
-    @Column(updatable = false)
+    private boolean daily;
     private LocalDateTime createdAt;
-    @Column(updatable = false)
     private LocalDateTime expiresAt;
-
     private boolean completed;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @DBRef
+    @ToString.Exclude
     @JsonIgnore
     private User user;
-
-    // Getters & Setters
 }
+
 

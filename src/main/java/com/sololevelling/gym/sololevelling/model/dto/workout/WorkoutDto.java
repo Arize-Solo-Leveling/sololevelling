@@ -10,12 +10,13 @@
 
 package com.sololevelling.gym.sololevelling.model.dto.workout;
 
+import org.bson.types.ObjectId;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 public class WorkoutDto {
-    public UUID id;
+    public ObjectId id;
     public String name;
     public LocalDateTime date;
     public double totalVolume;

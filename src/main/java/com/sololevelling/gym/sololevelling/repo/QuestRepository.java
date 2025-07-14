@@ -11,7 +11,8 @@
 package com.sololevelling.gym.sololevelling.repo;
 
 import com.sololevelling.gym.sololevelling.model.Quest;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -19,9 +20,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface QuestRepository extends JpaRepository<Quest, UUID> {
+public interface QuestRepository extends MongoRepository<Quest, ObjectId> {
     List<Quest> findAllByCreatedAtAfter(LocalDateTime after);
 
-    List<Quest> findQuestsByUser_Id(UUID userId);
+    List<Quest> findQuestsByUser_Id(ObjectId userId);
 
 }

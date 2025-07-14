@@ -8,12 +8,12 @@ import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutMapper;
 import com.sololevelling.gym.sololevelling.repo.*;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
-import jakarta.persistence.EntityNotFoundException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,13 +45,13 @@ public class AdminService {
         return userRepo.findAll();
     }
 
-    public User getUserById(UUID userId) {
+    public User getUserById(ObjectId userId) {
         return userRepo.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException("User not found")
+                new UsernameNotFoundException("User not found")
         );
     }
 
-    public User updateUserRole(UUID userId, String newRoleName) {
+    public User updateUserRole(ObjectId userId, String newRoleName) {
         User user = getUserById(userId);
 
         // Prefix check (Spring Security requires "ROLE_" format)
@@ -69,9 +69,9 @@ public class AdminService {
         return userRepo.save(user);
     }
 
-    public void deleteUser(UUID userId) {
+    public void deleteUser(ObjectId userId) {
         if (!userRepo.existsById(userId)) {
-            throw new EntityNotFoundException("User not found");
+            throw new UsernameNotFoundException("User not found");
         }
         userRepo.deleteById(userId);
     }
@@ -80,7 +80,7 @@ public class AdminService {
         return roleRepository.findAll();
     }
 
-    public WorkoutDto getWorkoutDetail(UUID workoutId) throws AccessDeniedException {
+    public WorkoutDto getWorkoutDetail(ObjectId workoutId) throws AccessDeniedException {
         Workout workout = workoutRepo.findById(workoutId)
                 .orElseThrow(() -> new AccessDeniedException("Workout not found"));
         return WorkoutMapper.toDto(workout);
