@@ -8,11 +8,10 @@
 
  */
 
-package com.sololevelling.gym.sololevelling.repo;
+package com.sololevelling.gym.sololevelling.repo.init;
 
-import com.sololevelling.gym.sololevelling.model.UserQuest;
-import org.bson.types.ObjectId;
+import com.sololevelling.gym.sololevelling.model.init.SystemSetting;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface UserQuestRepository extends MongoRepository<UserQuest, ObjectId> {
+public interface SystemSettingRepository extends MongoRepository<SystemSetting, String> {
 }

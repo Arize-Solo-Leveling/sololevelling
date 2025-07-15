@@ -17,6 +17,7 @@ import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.service.DungeonService;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import com.sololevelling.gym.sololevelling.util.StatsLowException;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,7 +46,7 @@ public class DungeonController {
 
     @PostMapping("/{dungeonId}/attempt")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> attemptDungeon(@PathVariable Long dungeonId, Principal principal) throws AccessDeniedException, StatsLowException {
+    public ResponseEntity<?> attemptDungeon(@PathVariable ObjectId dungeonId, Principal principal) throws AccessDeniedException, StatsLowException {
         return ResponseEntity.ok(dungeonService.attemptDungeon(dungeonId, principal.getName()));
     }
 

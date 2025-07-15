@@ -8,17 +8,21 @@
 
  */
 
-package com.sololevelling.gym.sololevelling.model;
+package com.sololevelling.gym.sololevelling.model.init;
 
 import lombok.Data;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document
 @Data
-public class Role {
+public class SystemSetting {
     @Id
-    private ObjectId id;
-    private String name;
+    private String id;
+    private boolean initialSetupDone;
+
+    public SystemSetting(String s, boolean b) {
+        this.id = s;
+        this.initialSetupDone = b;
+    }
 }

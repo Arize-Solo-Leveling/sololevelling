@@ -10,10 +10,8 @@
 
 package com.sololevelling.gym.sololevelling.model;
 
-import jakarta.persistence.Embeddable;
 import lombok.Data;
 
-@Embeddable
 @Data
 public class Stats {
     private Integer strength = 0;

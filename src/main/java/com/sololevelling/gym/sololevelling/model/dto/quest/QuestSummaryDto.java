@@ -10,10 +10,10 @@
 
 package com.sololevelling.gym.sololevelling.model.dto.quest;
 
-import java.util.UUID;
+import org.bson.types.ObjectId;
 
 public class QuestSummaryDto {
-    public UUID id;
+    public ObjectId id;
     public String title;
     public int experienceReward;
 }

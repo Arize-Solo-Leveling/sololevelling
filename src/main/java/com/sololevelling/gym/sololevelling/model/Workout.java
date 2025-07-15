@@ -11,31 +11,35 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-@Entity
+@Document
 @Data
 public class Workout {
-    public String name;
     @Id
-    @GeneratedValue
-    private UUID id;
+    private ObjectId id;
+
+    private String name;
     private LocalDateTime date;
     private int durationMinutes;
     private double totalVolume;
     private int experienceGained;
 
-    @ManyToOne
+    @DBRef
+    @ToString.Exclude
     @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @DBRef
     private List<Exercise> exercises = new ArrayList<>();
 }
+

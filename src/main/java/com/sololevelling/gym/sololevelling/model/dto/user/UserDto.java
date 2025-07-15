@@ -15,14 +15,14 @@ import com.sololevelling.gym.sololevelling.model.dto.inventory.ItemSummaryDto;
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestSummaryDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutSummaryDto;
 import lombok.Data;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class UserDto {
-    public UUID id;
+    public ObjectId id;
     public String name;
     public String email;
     public int level;

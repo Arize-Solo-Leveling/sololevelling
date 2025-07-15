@@ -12,14 +12,14 @@ package com.sololevelling.gym.sololevelling.repo;
 
 import com.sololevelling.gym.sololevelling.model.AccessToken;
 import com.sololevelling.gym.sololevelling.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface AccessTokenRepository extends JpaRepository<AccessToken, UUID> {
+public interface AccessTokenRepository extends MongoRepository<AccessToken, ObjectId> {
     Optional<AccessToken> findByToken(String token);
 
     void deleteByUser(User user);

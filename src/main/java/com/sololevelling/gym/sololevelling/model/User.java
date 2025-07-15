@@ -10,23 +10,27 @@
 
 package com.sololevelling.gym.sololevelling.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
-import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
-@Entity
+@Document
 @Data
+@EqualsAndHashCode(exclude = {"quests", "workouts", "inventory", "roles"})
+@ToString(exclude = {"quests", "workouts", "inventory", "roles"})
 public class User {
     @Id
-    @GeneratedValue
-    private UUID id;
+    private ObjectId id;
 
     private String name;
     private String email;
@@ -36,29 +40,23 @@ public class User {
     private Integer experience = 0;
     private Integer statPoints = 0;
 
-    @Embedded
     private Stats stats;
-
-    @Enumerated(EnumType.STRING)
     private UserClass userClass;
-    @ManyToMany(fetch = FetchType.EAGER)
+
+    @DBRef
     private Set<Role> roles;
 
+    @DBRef
+    private List<Quest> quests = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    @JsonIgnore
-    private List<Quest> quests;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
+    @DBRef
     private List<Workout> workouts = new ArrayList<>();
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+
+    @DBRef
     private List<InventoryItem> inventory = new ArrayList<>();
 
     private LocalDateTime lastLogout;
-
     private int failedLoginAttempts = 0;
-
     private LocalDateTime lockoutUntil;
 
     public boolean isLocked() {
@@ -98,5 +96,4 @@ public class User {
         this.stats.setIntelligence(this.stats.getIntelligence() - stats.getIntelligence());
         this.stats.setLuck(this.stats.getLuck() - stats.getLuck());
     }
-
 }

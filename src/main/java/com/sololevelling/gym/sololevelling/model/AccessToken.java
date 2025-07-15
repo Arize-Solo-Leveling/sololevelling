@@ -10,27 +10,27 @@
 
 package com.sololevelling.gym.sololevelling.model;
 
-import jakarta.persistence.*;
 import lombok.Data;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
-import java.util.UUID;
 
-@Entity
+@Document
 @Data
 public class AccessToken {
-
     @Id
-    @GeneratedValue
-    private UUID id;
+    private ObjectId id;
 
-    @Column(unique = true, length = 1000)
+    @Indexed(unique = true)
     private String token;
 
-    @ManyToOne
+    @DBRef
     private User user;
 
     private Instant expiryDate;
-
-    // Constructors, Getters, Setters
 }
+

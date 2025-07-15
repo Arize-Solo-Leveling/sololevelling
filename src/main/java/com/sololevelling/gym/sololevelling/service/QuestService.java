@@ -21,14 +21,15 @@ import com.sololevelling.gym.sololevelling.model.dto.quest.QuestMapper;
 import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.QuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 @Service
 public class QuestService {
@@ -55,7 +56,7 @@ public class QuestService {
                 .toList();
     }
 
-    public String completeQuest(UUID questId, String email) {
+    public String completeQuest(ObjectId questId, String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         Quest quest = questRepo.findById(questId).orElseThrow();
         if (LocalDateTime.now().isAfter(quest.getExpiresAt())) {
@@ -68,6 +69,12 @@ public class QuestService {
         InventoryItem rewardItem = generateRandomReward(user);
         inventoryItemRepository.save(rewardItem);
         user.completeQuest(quest);
+        List<InventoryItem> currentInventory = user.getInventory();
+        if (currentInventory == null) {
+            currentInventory = new ArrayList<>();
+        }
+        currentInventory.add(rewardItem);
+        user.setInventory(currentInventory);
         quest.setCompleted(true);
         questRepo.save(quest);
         userRepo.save(user);
@@ -126,7 +133,7 @@ public class QuestService {
         return item;
     }
 
-    public QuestDto createQuest(CreateQuestRequest req, UUID uuid) {
+    public QuestDto createQuest(CreateQuestRequest req, ObjectId uuid) {
         Quest quest = new Quest();
         User user = userRepository.findById(uuid).orElseThrow();
         quest.setTitle(req.title);
@@ -153,11 +160,11 @@ public class QuestService {
     }
 
 
-    public Optional<Quest> getQuestById(UUID id) {
+    public Optional<Quest> getQuestById(ObjectId id) {
         return questRepository.findById(id);
     }
 
-    public void deleteQuest(UUID id) throws Exception {
+    public void deleteQuest(ObjectId id) throws Exception {
         if (!questRepository.existsById(id)) {
             throw new Exception("Quest not found");
         }

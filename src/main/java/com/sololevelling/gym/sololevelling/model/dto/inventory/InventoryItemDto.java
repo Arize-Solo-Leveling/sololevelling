@@ -11,9 +11,10 @@
 package com.sololevelling.gym.sololevelling.model.dto.inventory;
 
 import com.sololevelling.gym.sololevelling.model.Stats;
+import org.bson.types.ObjectId;
 
 public class InventoryItemDto {
-    public Long id;
+    public ObjectId id;
     public String name;
     public InventoryRarity rarity;
     public String slot;

@@ -11,36 +11,34 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Document
 @Data
 public class Dungeon {
     @Id
-    @GeneratedValue
-    private Long id;
+    private ObjectId id;
 
     private String name;
-    private String type; // time-attack, endurance
+    private String type;
     private String objective;
     private int expReward;
     private String lootReward;
 
-    @Column(updatable = false)
     private LocalDateTime createdAt;
-    @Column(updatable = false)
     private LocalDateTime expiresAt;
 
-    @ManyToOne
-    @JsonIgnore
-    private User user;
     private boolean completed;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @DBRef
+    @ToString.Exclude
+    @JsonIgnore
+    private User user;
 }

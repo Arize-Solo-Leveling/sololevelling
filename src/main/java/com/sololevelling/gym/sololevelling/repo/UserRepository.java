@@ -12,24 +12,21 @@ package com.sololevelling.gym.sololevelling.repo;
 
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.bson.types.ObjectId;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, UUID> {
+public interface UserRepository extends MongoRepository<User, ObjectId> {
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM User u ORDER BY u.level DESC, u.experience DESC")
-    List<User> findTopGlobalLeaderboard();
+    List<User> findTop10ByOrderByLevelDescExperienceDesc();
 
-    @Query("SELECT u FROM User u WHERE u.userClass = :userClass ORDER BY u.level DESC, u.experience DESC")
-    List<User> findTopLeaderboardByClass(@Param("userClass") UserClass userClass);
+    List<User> findTop10ByUserClassOrderByLevelDescExperienceDesc(@Param("userClass") UserClass userClass);
 
     boolean existsByEmail(String email);
 }
