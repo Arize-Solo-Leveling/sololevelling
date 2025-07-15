@@ -40,13 +40,6 @@ public class QuestController {
         return ResponseEntity.ok(questService.completeQuest(questId, principal.getName()));
     }
 
-    @GetMapping("/week")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<?> getWeeklyQuests(Principal principal) {
-        List<QuestDto> weekly = questService.getWeeklyQuests(principal.getName());
-        return ResponseEntity.ok(weekly);
-    }
-
     @GetMapping("/history")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getQuestHistory(Principal principal) {

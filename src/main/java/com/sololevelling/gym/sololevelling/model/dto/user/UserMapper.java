@@ -73,7 +73,6 @@ public class UserMapper {
             questSummaryDto.id = quest.getId();
             questSummaryDto.title = quest.getTitle();
             questSummaryDto.experienceReward = quest.getExperienceReward();
-            questSummaryDto.daily = quest.isDaily();
             return questSummaryDto;
         }).toList();
 

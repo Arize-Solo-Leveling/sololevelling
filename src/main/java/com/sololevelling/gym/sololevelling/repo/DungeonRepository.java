@@ -24,6 +24,4 @@ public interface DungeonRepository extends MongoRepository<Dungeon, ObjectId> {
 
     List<Dungeon> findByUserAndCompletedFalse(User user);
 
-    List<Dungeon> findByUserAndWeeklyTrue(User user);
-
 }

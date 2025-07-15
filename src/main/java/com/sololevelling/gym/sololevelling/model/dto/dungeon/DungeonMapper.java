@@ -24,7 +24,6 @@ public class DungeonMapper {
         dto.expReward = dungeon.getExpReward();
         dto.lootReward = dungeon.getLootReward();
         dto.completed = dungeon.isCompleted();
-        dto.isWeekly = dungeon.isWeekly();
         dto.expired = LocalDateTime.now().isAfter(dungeon.getExpiresAt());
 
         return dto;

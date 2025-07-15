@@ -24,7 +24,6 @@ public class QuestMapper {
         dto.title = quest.getTitle();
         dto.description = quest.getDescription();
         dto.experienceReward = quest.getExperienceReward();
-        dto.daily = quest.isDaily();
         dto.completed = user.getQuests().stream().anyMatch(q -> q.isCompleted() && q.getId().equals(quest.getId()));
         dto.expired = LocalDateTime.now().isAfter(quest.getExpiresAt());
         return dto;

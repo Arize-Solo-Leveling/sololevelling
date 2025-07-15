@@ -139,13 +139,8 @@ public class QuestService {
         quest.setTitle(req.title);
         quest.setDescription(req.description);
         quest.setExperienceReward(req.experienceReward);
-        quest.setDaily(req.daily);
         quest.setCreatedAt(LocalDateTime.now());
-        if (req.daily) {
-            quest.setExpiresAt(quest.getCreatedAt().plusDays(1));
-        } else {
-            quest.setExpiresAt(quest.getCreatedAt().plusWeeks(1));
-        }
+        quest.setExpiresAt(quest.getCreatedAt().plusDays(1));
         quest.setUser(user);
         questRepo.save(quest);
         return QuestMapper.toDto(quest, user); // pass null user to skip completed status
@@ -157,17 +152,6 @@ public class QuestService {
         return recentQuests.stream()
                 .filter(Quest::isCompleted)
                 .map(q -> QuestMapper.toDto(q, user))
-                .toList();
-    }
-
-    public List<QuestDto> getWeeklyQuests(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow();
-
-        List<Quest> weeklyQuests = questRepo.findQuestsByUser_Id(user.getId());
-
-        return weeklyQuests.stream()
-                .filter(q -> !q.isDaily())
-                .map(quest -> QuestMapper.toDto(quest, user))
                 .toList();
     }
 

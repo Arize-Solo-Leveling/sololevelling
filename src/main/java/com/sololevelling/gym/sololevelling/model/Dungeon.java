@@ -31,7 +31,6 @@ public class Dungeon {
     private String objective;
     private int expReward;
     private String lootReward;
-    private boolean weekly;
 
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;

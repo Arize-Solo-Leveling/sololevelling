@@ -29,7 +29,6 @@ public class Quest {
     private String title;
     private String description;
     private int experienceReward;
-    private boolean daily;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
     private boolean completed;
