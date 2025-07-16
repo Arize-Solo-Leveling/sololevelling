@@ -81,7 +81,12 @@ public class WorkoutService {
 
         // 5. Update user XP
         user.setExperience(user.getExperience() + xp);
-        user.setWorkouts(List.of(workout));
+        List<Workout> workouts = user.getWorkouts();
+        if (workouts == null){
+            workouts = new ArrayList<>();
+        }
+        workouts.add(workout);
+        user.setWorkouts(workouts);
         userRepository.save(user);
 
         return WorkoutMapper.toDto(workout);
