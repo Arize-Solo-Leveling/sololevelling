@@ -18,6 +18,7 @@ import com.sololevelling.gym.sololevelling.repo.*;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.repository.support.SimpleMongoRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +48,8 @@ public class AdminService {
     private RefreshTokenRepository refreshTokenRepository;
     @Autowired
     private StatSnapshotRepository statSnapshotRepository;
+    @Autowired
+    private ExerciseRepository exerciseRepo;
 
     public StatsResponse getDashboardStats() {
         long users = userRepo.count();
@@ -94,7 +97,12 @@ public class AdminService {
         questRepo.deleteAll(quests);
 
         List<Workout> workouts = workoutRepo.findWorkoutsByUser_Id(userId);
+        for (Workout workout : workouts) {
+            List<Exercise> exercises = exerciseRepo.findExercisesByWorkout_Id(workout.getId());
+            exerciseRepo.deleteAll(exercises);
+        }
         workoutRepo.deleteAll(workouts);
+
 
         List<InventoryItem> items = inventoryItemRepository.findInventoryItemsByUser_Id(userId);
         inventoryItemRepository.deleteAll(items);
