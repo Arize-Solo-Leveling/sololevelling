@@ -10,9 +10,7 @@
 
 package com.sololevelling.gym.sololevelling.service;
 
-import com.sololevelling.gym.sololevelling.model.Role;
-import com.sololevelling.gym.sololevelling.model.User;
-import com.sololevelling.gym.sololevelling.model.Workout;
+import com.sololevelling.gym.sololevelling.model.*;
 import com.sololevelling.gym.sololevelling.model.dto.admin.StatsResponse;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutMapper;
@@ -22,8 +20,10 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +41,12 @@ public class AdminService {
     private RoleRepository roleRepository;
     @Autowired
     private InventoryItemRepository inventoryItemRepository;
+    @Autowired
+    private AccessTokenRepository accessTokenRepository;
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
+    @Autowired
+    private StatSnapshotRepository statSnapshotRepository;
 
     public StatsResponse getDashboardStats() {
         long users = userRepo.count();
@@ -79,12 +85,32 @@ public class AdminService {
         return userRepo.save(user);
     }
 
+    @Transactional
     public void deleteUser(ObjectId userId) {
-        if (!userRepo.existsById(userId)) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        userRepo.deleteById(userId);
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        List<Quest> quests = questRepo.findQuestsByUser_Id(userId);
+        questRepo.deleteAll(quests);
+
+        List<Workout> workouts = workoutRepo.findWorkoutsByUser_Id(userId);
+        workoutRepo.deleteAll(workouts);
+
+        List<InventoryItem> items = inventoryItemRepository.findInventoryItemsByUser_Id(userId);
+        inventoryItemRepository.deleteAll(items);
+
+        List<Dungeon> dungeons = dungeonRepo.findDungeonsByUser_Id(userId);
+        dungeonRepo.deleteAll(dungeons);
+
+        accessTokenRepository.deleteByUser(user);
+        refreshTokenRepository.deleteByUser(user);
+
+        List<StatSnapshot> statSnapshots = statSnapshotRepository.findStatSnapshotsByUser_Id(userId);
+        statSnapshotRepository.deleteAll(statSnapshots);
+
+        userRepo.delete(user);
     }
+
 
     public List<Role> getAllRoles() {
         return roleRepository.findAll();
