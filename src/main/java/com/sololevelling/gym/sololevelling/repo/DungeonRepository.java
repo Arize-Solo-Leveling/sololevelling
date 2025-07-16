@@ -21,6 +21,7 @@ import java.util.List;
 @Repository
 public interface DungeonRepository extends MongoRepository<Dungeon, ObjectId> {
     List<Dungeon> findByUser(User user);
+    List<Dungeon> findDungeonsByUser_Id(ObjectId objectId);
 
     List<Dungeon> findByUserAndCompletedFalse(User user);
 
