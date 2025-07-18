@@ -94,10 +94,16 @@ public class WeeklyDungeonService {
     }
 
     private Dungeon cloneDungeonForUser(Dungeon template, User user) {
-        dungeonUSerHelper(template.getName(), template.getType(), template.getObjective(), template.getExpReward(), template.getLootReward(), template);
-        template.setCreatedAt(LocalDateTime.now());
-        template.setExpiresAt(template.getCreatedAt().plusWeeks(1));
-        template.setUser(user);
-        return template;
+        Dungeon clone = new Dungeon();
+        clone.setName(template.getName());
+        clone.setType(template.getType());
+        clone.setObjective(template.getObjective());
+        clone.setExpReward(template.getExpReward());
+        clone.setLootReward(template.getLootReward());
+        clone.setCreatedAt(LocalDateTime.now());
+        clone.setExpiresAt(clone.getCreatedAt().plusWeeks(1));
+        clone.setCompleted(false);
+        clone.setUser(user);
+        return clone;
     }
 }
