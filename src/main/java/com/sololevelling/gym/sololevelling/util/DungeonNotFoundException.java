@@ -8,7 +8,6 @@
 
  */
 
-
 package com.sololevelling.gym.sololevelling.util;
 
 public class DungeonNotFoundException extends Throwable {

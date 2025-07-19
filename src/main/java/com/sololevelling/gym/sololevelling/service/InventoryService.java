@@ -53,7 +53,6 @@ public class InventoryService {
             }
         }
 
-        // Equip the new item
         item.setEquipped(true);
         user.addStats(item.getStatBoosts());
 

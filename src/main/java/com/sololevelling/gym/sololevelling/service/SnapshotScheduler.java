@@ -30,7 +30,7 @@ public class SnapshotScheduler {
     @Autowired
     private StatSnapshotRepository snapshotRepo;
 
-    @Scheduled(cron = "0 0 0 * * *") // Every day at midnight
+    @Scheduled(cron = "0 0 0 * * *")
     public void saveDailySnapshots() {
         List<User> users = userRepo.findAll();
         LocalDate today = LocalDate.now();

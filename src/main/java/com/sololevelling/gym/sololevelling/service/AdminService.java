@@ -12,19 +12,19 @@ package com.sololevelling.gym.sololevelling.service;
 
 import com.sololevelling.gym.sololevelling.model.*;
 import com.sololevelling.gym.sololevelling.model.dto.admin.StatsResponse;
+import com.sololevelling.gym.sololevelling.model.dto.user.UserDto;
+import com.sololevelling.gym.sololevelling.model.dto.user.UserMapper;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutMapper;
 import com.sololevelling.gym.sololevelling.repo.*;
 import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.repository.support.SimpleMongoRepository;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,20 +60,22 @@ public class AdminService {
         return new StatsResponse(users, quests, dungeons, workouts, inventory);
     }
 
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
+    public List<UserDto> getAllUsers() {
+        return userRepo.findAll().stream().filter(user -> !"Admin".equals(user.getName())).map(UserMapper::toDto).collect(Collectors.toList());
     }
 
-    public User getUserById(ObjectId userId) {
-        return userRepo.findById(userId).orElseThrow(() ->
+    public UserDto getUserById(ObjectId userId) {
+        User user = userRepo.findById(userId).orElseThrow(() ->
                 new UsernameNotFoundException("User not found")
         );
+        return UserMapper.toDto(user);
     }
 
-    public User updateUserRole(ObjectId userId, String newRoleName) {
-        User user = getUserById(userId);
+    public UserDto updateUserRole(ObjectId userId, String newRoleName) {
+        User user = userRepo.findById(userId).orElseThrow(() ->
+                new UsernameNotFoundException("User not found")
+        );
 
-        // Prefix check (Spring Security requires "ROLE_" format)
         if (!newRoleName.startsWith("ROLE_")) {
             newRoleName = "ROLE_" + newRoleName;
         }
@@ -82,10 +84,9 @@ public class AdminService {
         Role newRole = roleRepository.findByName(newRoleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + finalNewRoleName));
 
-        // Assign the new role
         user.getRoles().add(newRole);
-
-        return userRepo.save(user);
+        userRepo.save(user);
+        return UserMapper.toDto(user);
     }
 
     @Transactional

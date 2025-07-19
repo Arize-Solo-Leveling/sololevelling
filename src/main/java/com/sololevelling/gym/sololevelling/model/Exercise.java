@@ -34,15 +34,4 @@ public class Exercise {
     @JsonIgnore
     private Workout workout;
 
-    public Exercise(String name, int sets, int reps, double weight, Workout workout) {
-        this.name = name;
-        this.sets = sets;
-        this.reps = reps;
-        this.weight = weight;
-        this.workout = workout;
-    }
-
-    public Exercise() {
-
-    }
 }

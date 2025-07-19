@@ -95,7 +95,7 @@ public class DungeonService {
         }
     }
 
-    public Dungeon createDungeonForUser(DungeonRequest request, ObjectId uuid) {
+    public DungeonDto createDungeonForUser(DungeonRequest request, ObjectId uuid) {
         User user = userRepository.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
 
         Dungeon dungeon = new Dungeon();
@@ -109,7 +109,7 @@ public class DungeonService {
         dungeon.setExpiresAt(dungeon.getCreatedAt().plusWeeks(1));
         dungeon.setUser(user);
 
-        return dungeonRepository.save(dungeon);
+        return DungeonMapper.toDto(dungeonRepository.save(dungeon));
     }
 
     public List<DungeonDto> getDungeonHistory(String email) {
@@ -176,13 +176,15 @@ public class DungeonService {
         return item;
     }
 
-    public List<Dungeon> getAllDungeons() {
-        return dungeonRepository.findAll();
+    public List<DungeonDto> getAllDungeons() {
+        return dungeonRepository.findAll().stream()
+                .map(DungeonMapper::toDto).toList();
     }
 
-    public Dungeon getDungeonById(ObjectId id) throws DungeonNotFoundException {
-        return dungeonRepository.findById(id)
+    public DungeonDto getDungeonById(ObjectId id) throws DungeonNotFoundException {
+        Dungeon dungeon = dungeonRepository.findById(id)
                 .orElseThrow(() -> new DungeonNotFoundException("Dungeon not found"));
+        return DungeonMapper.toDto(dungeon);
     }
 
     public void deleteDungeonById(ObjectId id) {

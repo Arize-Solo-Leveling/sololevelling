@@ -42,17 +42,15 @@ public class WorkoutService {
     public WorkoutDto submitWorkout(WorkoutRequest request, String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
 
-        // 1. Create and save workout first (without exercises)
         Workout workout = new Workout();
         workout.setName(request.name);
         workout.setUser(user);
         workout.setDate(LocalDateTime.now());
         workout.setTotalVolume(0);
         workout.setExperienceGained(0);
-        workout.setExercises(new ArrayList<>()); // init empty list
-        workout = workoutRepo.save(workout); // now workout has _id
+        workout.setExercises(new ArrayList<>());
+        workout = workoutRepo.save(workout);
 
-        // 2. Now that workout has ID, safely create exercises
         double totalVolume = 0;
         List<Exercise> exercises = new ArrayList<>();
 
@@ -65,24 +63,21 @@ public class WorkoutService {
             ex.setSets(e.sets);
             ex.setReps(e.reps);
             ex.setWeight(e.weight);
-            ex.setWorkout(workout); // workout now has _id
+            ex.setWorkout(workout);
             exercises.add(ex);
         }
 
-        // 3. Save exercises
         exerciseRepo.saveAll(exercises);
 
-        // 4. Update workout with exercise list and volume
         workout.setExercises(exercises);
         workout.setTotalVolume(totalVolume);
         int xp = (int) (totalVolume / 50);
         workout.setExperienceGained(xp);
-        workoutRepo.save(workout); // re-save updated workout
+        workoutRepo.save(workout);
 
-        // 5. Update user XP
         user.setExperience(user.getExperience() + xp);
         List<Workout> workouts = user.getWorkouts();
-        if (workouts == null){
+        if (workouts == null) {
             workouts = new ArrayList<>();
         }
         workouts.add(workout);

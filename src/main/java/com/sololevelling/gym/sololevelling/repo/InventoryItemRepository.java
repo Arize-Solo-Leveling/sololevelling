@@ -21,5 +21,6 @@ import java.util.List;
 @Repository
 public interface InventoryItemRepository extends MongoRepository<InventoryItem, ObjectId> {
     List<InventoryItem> findByUser(User user);
+
     List<InventoryItem> findInventoryItemsByUser_Id(ObjectId objectId);
 }

@@ -28,6 +28,7 @@ public class LeaderboardService {
     public List<LeaderboardEntryDto> getGlobalLeaderboard() {
         return userRepository.findTop10ByOrderByLevelDescExperienceDesc()
                 .stream()
+                .filter(user -> !"Admin".equals(user.getName()))
                 .map(this::mapToDto)
                 .toList();
     }
@@ -35,6 +36,7 @@ public class LeaderboardService {
     public List<LeaderboardEntryDto> getClassLeaderboard(UserClass userClass) {
         return userRepository.findTop10ByUserClassOrderByLevelDescExperienceDesc(userClass)
                 .stream()
+                .filter(user -> !"Admin".equals(user.getName()))
                 .map(this::mapToDto)
                 .toList();
     }

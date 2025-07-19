@@ -10,8 +10,6 @@
 
 package com.sololevelling.gym.sololevelling.admin;
 
-import com.sololevelling.gym.sololevelling.model.Dungeon;
-import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.model.dto.admin.RoleUpdateRequest;
 import com.sololevelling.gym.sololevelling.model.dto.admin.StatsResponse;
 import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonRequest;
@@ -24,8 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
@@ -49,12 +45,12 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<?> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable ObjectId userId) {
+    public ResponseEntity<?> getUser(@PathVariable ObjectId userId) {
         return ResponseEntity.ok(adminService.getUserById(userId));
     }
 
@@ -75,18 +71,18 @@ public class AdminController {
     }
 
     @GetMapping("/dungeon")
-    public ResponseEntity<List<Dungeon>> getAllDungeons() {
+    public ResponseEntity<?> getAllDungeons() {
         return ResponseEntity.ok(dungeonService.getAllDungeons());
     }
 
     @GetMapping("/dungeon/{id}")
-    public ResponseEntity<Dungeon> getDungeonById(@PathVariable ObjectId id) throws DungeonNotFoundException {
+    public ResponseEntity<?> getDungeonById(@PathVariable ObjectId id) throws DungeonNotFoundException {
         return ResponseEntity.ok(dungeonService.getDungeonById(id));
     }
 
     @PostMapping("/dungeon/{userId}")
-    public ResponseEntity<Dungeon> createDungeonForUser(@PathVariable ObjectId userId,
-                                                        @RequestBody DungeonRequest request) {
+    public ResponseEntity<?> createDungeonForUser(@PathVariable ObjectId userId,
+                                                  @RequestBody DungeonRequest request) {
         return ResponseEntity.ok(dungeonService.createDungeonForUser(request, userId));
     }
 

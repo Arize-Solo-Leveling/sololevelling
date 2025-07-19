@@ -21,5 +21,6 @@ import java.util.List;
 @Repository
 public interface WorkoutRepository extends MongoRepository<Workout, ObjectId> {
     List<Workout> findByUser(User user);
+
     List<Workout> findWorkoutsByUser_Id(ObjectId id);
 }

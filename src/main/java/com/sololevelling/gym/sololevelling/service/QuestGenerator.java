@@ -49,7 +49,7 @@ public class QuestGenerator {
     @Autowired
     private UserQuestRepository userQuestRepo;
 
-    @Scheduled(cron = "0 0 0 * * *") // daily at midnight
+    @Scheduled(cron = "0 0 0 * * *")
     public void generateDailyQuests() {
         List<Quest> dailyQuestsTemplate = newQuests.stream().toList();
         List<User> users = userRepo.findAll();
@@ -71,7 +71,7 @@ public class QuestGenerator {
         List<Quest> allTemplates = new ArrayList<>(newQuests);
 
         Collections.shuffle(allTemplates);
-        int count = new Random().nextInt(2) + 2; // Random between 2 and 3
+        int count = new Random().nextInt(2) + 2;
         List<Quest> selectedTemplates = allTemplates.subList(0, Math.min(count, allTemplates.size()));
 
         User user = userRepo.findById(uuid).orElseThrow();

@@ -24,14 +24,14 @@ import java.util.stream.IntStream;
 
 @Component
 public class UserMapper {
-    private final ExperienceService experienceService;
+    private static ExperienceService experienceService = null;
 
     @Autowired
     public UserMapper(ExperienceService experienceService) {
-        this.experienceService = experienceService;
+        UserMapper.experienceService = experienceService;
     }
 
-    public UserDto toDto(User user) {
+    public static UserDto toDto(User user) {
         UserDto dto = new UserDto();
         dto.id = user.getId();
         dto.name = user.getName();

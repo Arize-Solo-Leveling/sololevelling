@@ -12,6 +12,8 @@ package com.sololevelling.gym.sololevelling.service;
 
 import com.sololevelling.gym.sololevelling.model.Dungeon;
 import com.sololevelling.gym.sololevelling.model.User;
+import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonDto;
+import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonMapper;
 import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import org.bson.types.ObjectId;
@@ -63,7 +65,7 @@ public class WeeklyDungeonService {
         clone.setCompleted(false);
     }
 
-    @Scheduled(cron = "0 0 0 * * MON") // Every Monday at 00:00
+    @Scheduled(cron = "0 0 0 * * MON")
     public void generateWeeklyDungeons() {
         List<User> users = userRepo.findAll();
 
@@ -77,20 +79,20 @@ public class WeeklyDungeonService {
 
     }
 
-    public List<Dungeon> pickRandomWeeklyDungeon(ObjectId userId) {
+    public List<DungeonDto> pickRandomWeeklyDungeon(ObjectId userId) {
         User user = userRepo.findById(userId).orElseThrow();
 
         List<Dungeon> shuffled = new java.util.ArrayList<>(baseWeeklyDungeons);
         Collections.shuffle(shuffled);
 
-        int count = new Random().nextInt(2) + 2; // Random: 2 to 3
+        int count = new Random().nextInt(2) + 2;
         List<Dungeon> selected = shuffled.subList(0, Math.min(count, shuffled.size()))
                 .stream()
                 .map(d -> cloneDungeonForUser(d, user))
                 .toList();
 
         dungeonRepo.saveAll(selected);
-        return selected;
+        return selected.stream().map(DungeonMapper::toDto).toList();
     }
 
     private Dungeon cloneDungeonForUser(Dungeon template, User user) {

@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -85,7 +84,6 @@ public class QuestService {
     private InventoryItem generateRandomReward(User user) {
         Random rand = new Random();
 
-        // Lighter or more utility-focused gear
         String[] itemNames = {
                 "Leather Gloves", "Training Band", "Runner’s Shoes", "Focus Pendant",
                 "Apprentice Cloak", "Wooden Buckler", "Scout Hood"
@@ -143,10 +141,10 @@ public class QuestService {
         quest.setExpiresAt(quest.getCreatedAt().plusDays(1));
         quest.setUser(user);
         questRepo.save(quest);
-        return QuestMapper.toDto(quest, user); // pass null user to skip completed status
+        return QuestMapper.toDto(quest, user);
     }
 
-    public Object getQuestHistory(String email) {
+    public List<QuestDto> getQuestHistory(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
         List<Quest> recentQuests = questRepo.findQuestsByUser_Id(user.getId());
         return recentQuests.stream()
@@ -155,13 +153,16 @@ public class QuestService {
                 .toList();
     }
 
-    public List<Quest> getAllQuests() {
-        return questRepository.findAll();
+    public List<QuestDto> getAllQuests() {
+        return questRepository.findAll().stream()
+                .map(quest -> QuestMapper.toDto(quest, quest.getUser()))
+                .toList();
     }
 
 
-    public Optional<Quest> getQuestById(ObjectId id) {
-        return questRepository.findById(id);
+    public QuestDto getQuestById(ObjectId id) {
+        Quest quest = questRepository.findById(id).orElseThrow(() -> new RuntimeException("Quest not found"));
+        return QuestMapper.toDto(quest, quest.getUser());
     }
 
     public void deleteQuest(ObjectId id) throws Exception {

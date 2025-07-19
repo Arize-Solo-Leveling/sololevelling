@@ -30,7 +30,7 @@ public class ExperienceService {
         int level = user.getLevel();
         int statPoints = user.getStatPoints();
 
-        int maxLevel = 100; // Optional cap
+        int maxLevel = 100;
 
         while (level < maxLevel) {
             int requiredExp = getExpForNextLevel(level);
@@ -45,9 +45,7 @@ public class ExperienceService {
         userRepo.save(user);
     }
 
-    /**
-     * Returns the EXP required to level up from the current level to the next level.
-     */
+
     public int getExpForNextLevel(int level) {
         int exp = 100;
         for (int i = 1; i < level; i++) {
@@ -65,9 +63,7 @@ public class ExperienceService {
         return exp;
     }
 
-    /**
-     * Returns the total EXP required to reach the given level (sum of all EXP needed from level 1 up to level-1).
-     */
+
     public int getTotalExperienceForLevel(int level) {
         int total = 0;
         for (int i = 1; i < level; i++) {
@@ -76,12 +72,7 @@ public class ExperienceService {
         return total;
     }
 
-    /**
-     * Returns an object containing EXP progress:
-     * - Total EXP earned (all levels + current EXP)
-     * - Current EXP toward next level
-     * - EXP required for next level
-     */
+
     public ExperienceProgress getExperienceProgress(User user) {
         int level = user.getLevel();
         int exp = user.getExperience();

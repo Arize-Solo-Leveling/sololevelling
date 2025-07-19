@@ -16,7 +16,6 @@ import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -29,19 +28,16 @@ public class WorkoutController {
     private WorkoutService workoutService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> submitWorkout(@RequestBody WorkoutRequest request, Principal principal) {
         return ResponseEntity.ok(workoutService.submitWorkout(request, principal.getName()));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getWorkoutHistory(Principal principal) {
         return ResponseEntity.ok(workoutService.getWorkoutHistory(principal.getName()));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id, Principal principal) throws AccessDeniedException {
         return ResponseEntity.ok(workoutService.getWorkoutDetail(id, principal.getName()));
     }

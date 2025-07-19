@@ -42,18 +42,15 @@ public class StartupInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Only check if the init-flag exists; no field evaluation
         boolean alreadyInitialized = systemSettingRepository.existsById("init-flag");
         if (alreadyInitialized) {
             log.info("Initial setup flag found. Skipping initialization.");
             return;
         }
 
-        // Perform setup
         createDefaultRoles();
         createAdminUser();
 
-        // Save marker to prevent re-initialization
         systemSettingRepository.save(new SystemSetting("init-flag", true));
         log.info("Initial setup completed and init-flag saved.");
     }

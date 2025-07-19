@@ -14,7 +14,6 @@ import com.sololevelling.gym.sololevelling.service.InventoryService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -27,19 +26,16 @@ public class InventoryController {
     private InventoryService inventoryService;
 
     @GetMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> getInventory(Principal principal) {
         return ResponseEntity.ok(inventoryService.getInventory(principal.getName()));
     }
 
     @PostMapping("/{itemId}/equip")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> equip(@PathVariable ObjectId itemId, Principal principal) {
         return ResponseEntity.ok(inventoryService.equipItem(principal.getName(), itemId));
     }
 
     @PostMapping("/{itemId}/unequip")
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> unequip(@PathVariable ObjectId itemId, Principal principal) {
         return ResponseEntity.ok(inventoryService.unequipItem(principal.getName(), itemId));
     }

@@ -51,8 +51,6 @@ public class UserService implements UserDetailsService {
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
-    private UserMapper userMapper;
-    @Autowired
     private RefreshTokenRepository refreshTokenRepo;
     @Autowired
     private AccessTokenRepository accessTokenRepo;
@@ -81,6 +79,7 @@ public class UserService implements UserDetailsService {
         return "Registration successful. Please log in.";
     }
 
+    @Transactional
     public AuthResponse loginUser(LoginRequest req) {
         User user = userRepo.findByEmail(req.email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -91,11 +90,10 @@ public class UserService implements UserDetailsService {
 
         if (!encoder.matches(req.password, user.getPassword())) {
             user.incrementFailedAttempts();
-            userRepo.save(user);  // Save the updated attempt count and lock time
+            userRepo.save(user);
             throw new BadCredentialsException("Invalid password");
         }
 
-        // Successful login: reset failed attempts
         user.resetFailedAttempts();
         userRepo.save(user);
 
@@ -110,7 +108,7 @@ public class UserService implements UserDetailsService {
     }
 
     public RefreshToken createRefreshToken(User user) {
-        refreshTokenRepo.deleteByUser(user); // Remove existing
+        refreshTokenRepo.deleteByUser(user);
         RefreshToken token = new RefreshToken();
         token.setToken(UUID.randomUUID().toString());
         token.setUser(user);
@@ -157,7 +155,7 @@ public class UserService implements UserDetailsService {
 
     public UserDto getCurrentUserProfile(String email) {
         User user = userRepo.findByEmail(email).orElseThrow();
-        return userMapper.toDto(user);
+        return UserMapper.toDto(user);
     }
 
     public UserDto allocateStats(String email, StatAllocationRequest request) {
@@ -184,9 +182,10 @@ public class UserService implements UserDetailsService {
         user.setStatPoints(user.getStatPoints() - totalRequested);
 
         userRepo.save(user);
-        return userMapper.toDto(user);
+        return UserMapper.toDto(user);
     }
 
+    @Transactional
     public void logoutUser(String token) {
         String email = jwtUtil.extractUsername(token);
         User user = userRepo.findByEmail(email)
