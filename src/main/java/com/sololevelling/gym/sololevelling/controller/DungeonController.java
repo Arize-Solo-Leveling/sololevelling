@@ -29,10 +29,6 @@ public class DungeonController {
 
     @Autowired
     private DungeonService dungeonService;
-    @Autowired
-    private UserRepository userRepo;
-    @Autowired
-    private DungeonRepository dungeonRepo;
 
     @GetMapping
     public ResponseEntity<?> getAvailableDungeons(Principal principal) {

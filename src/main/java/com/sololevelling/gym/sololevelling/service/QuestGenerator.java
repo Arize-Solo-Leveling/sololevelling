@@ -46,8 +46,6 @@ public class QuestGenerator {
     private QuestRepository questRepo;
     @Autowired
     private UserRepository userRepo;
-    @Autowired
-    private UserQuestRepository userQuestRepo;
 
     @Scheduled(cron = "0 0 0 * * *")
     public void generateDailyQuests() {
