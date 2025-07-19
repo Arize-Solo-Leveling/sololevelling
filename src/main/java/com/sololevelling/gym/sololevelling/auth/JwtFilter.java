@@ -17,6 +17,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +35,8 @@ import java.util.Date;
 @Component
 @Order(1)
 public class JwtFilter extends OncePerRequestFilter {
+
+    private static final Logger SOLO_LOG = LoggerFactory.getLogger("SOLO_LOG");
 
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
@@ -61,19 +65,21 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             String username = jwtUtil.extractUsername(token);
 
+            SOLO_LOG.info("🔑 Token detected for user: {}", username);
+
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Optional: Check if token exists in the DB
                 boolean tokenExists = accessTokenRepo.findByToken(token).isPresent();
                 if (!tokenExists) {
+                    SOLO_LOG.warn("❌ Token not found in DB: {}", token);
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token has been invalidated");
                     return;
                 }
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 if (jwtUtil.validateToken(token, userDetails)) {
-                    // Additional logout-time check
                     User user = userRepository.findByEmail(username).orElse(null);
                     if (user == null) {
+                        SOLO_LOG.warn("❌ User not found: {}", username);
                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User not found");
                         return;
                     }
@@ -82,6 +88,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     if (user.getLastLogout() != null) {
                         var lastLogoutInstant = user.getLastLogout().atZone(ZoneId.systemDefault()).toInstant();
                         if (issuedAt.toInstant().isBefore(lastLogoutInstant)) {
+                            SOLO_LOG.warn("⛔ Token issued before last logout for user: {}", username);
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token issued before last logout");
                             return;
                         }
@@ -92,8 +99,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                     userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+
+                    SOLO_LOG.info("✅ Authenticated user: {}", username);
+                } else {
+                    SOLO_LOG.warn("❌ Invalid token for user: {}", username);
                 }
             }
+        } else {
+            SOLO_LOG.debug("🔒 No JWT found in header for request: {}", request.getRequestURI());
         }
 
         filterChain.doFilter(request, response);

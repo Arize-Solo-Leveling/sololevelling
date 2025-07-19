@@ -20,7 +20,10 @@ import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutRequest;
 import com.sololevelling.gym.sololevelling.repo.ExerciseRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.repo.WorkoutRepository;
-import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
+import com.sololevelling.gym.sololevelling.util.exception.AccessDeniedException;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
+import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
+import com.sololevelling.gym.sololevelling.util.exception.WorkoutNotFoundException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +43,11 @@ public class WorkoutService {
     private ExerciseRepository exerciseRepo;
 
     public WorkoutDto submitWorkout(WorkoutRequest request, String email) {
-        User user = userRepository.findByEmail(email).orElseThrow();
+        SoloLogger.info("🏋️ Submitting workout for user: {}", email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found: {}", email);
+            return new UserNotFoundException("User not found");
+        });
 
         Workout workout = new Workout();
         workout.setName(request.name);
@@ -49,7 +56,9 @@ public class WorkoutService {
         workout.setTotalVolume(0);
         workout.setExperienceGained(0);
         workout.setExercises(new ArrayList<>());
-        workout = workoutRepo.save(workout);
+
+        Workout savedWorkout = workoutRepo.save(workout);
+        SoloLogger.debug("Created base workout {} for user {}", savedWorkout.getId(), email);
 
         double totalVolume = 0;
         List<Exercise> exercises = new ArrayList<>();
@@ -63,39 +72,57 @@ public class WorkoutService {
             ex.setSets(e.sets);
             ex.setReps(e.reps);
             ex.setWeight(e.weight);
-            ex.setWorkout(workout);
+            ex.setWorkout(savedWorkout);
             exercises.add(ex);
         }
 
-        exerciseRepo.saveAll(exercises);
+        List<Exercise> savedExercises = exerciseRepo.saveAll(exercises);
+        SoloLogger.debug("Saved {} exercises for workout {}", savedExercises.size(), savedWorkout.getId());
 
-        workout.setExercises(exercises);
-        workout.setTotalVolume(totalVolume);
+        savedWorkout.setExercises(savedExercises);
+        savedWorkout.setTotalVolume(totalVolume);
         int xp = (int) (totalVolume / 50);
-        workout.setExperienceGained(xp);
-        workoutRepo.save(workout);
+        savedWorkout.setExperienceGained(xp);
+        workoutRepo.save(savedWorkout);
 
         user.setExperience(user.getExperience() + xp);
         List<Workout> workouts = user.getWorkouts();
         if (workouts == null) {
             workouts = new ArrayList<>();
         }
-        workouts.add(workout);
+        workouts.add(savedWorkout);
         user.setWorkouts(workouts);
         userRepository.save(user);
 
-        return WorkoutMapper.toDto(workout);
+        SoloLogger.info("✅ Workout {} submitted successfully (Volume: {}, XP: {})",
+                savedWorkout.getId(), totalVolume, xp);
+        return WorkoutMapper.toDto(savedWorkout);
     }
 
-
     public List<WorkoutDto> getWorkoutHistory(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow();
-        return workoutRepo.findByUser(user).stream().map(WorkoutMapper::toDto).toList();
+        SoloLogger.info("📅 Fetching workout history for user: {}", email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found: {}", email);
+            return new UserNotFoundException("User not found");
+        });
+
+        List<Workout> workouts = workoutRepo.findByUser(user);
+        SoloLogger.debug("Found {} workouts for user {}", workouts.size(), email);
+        return workouts.stream().map(WorkoutMapper::toDto).toList();
     }
 
     public WorkoutDto getWorkoutDetail(ObjectId id, String email) throws AccessDeniedException {
-        Workout workout = workoutRepo.findById(id).orElseThrow();
-        if (!workout.getUser().getEmail().equals(email)) throw new AccessDeniedException("Not your workout");
+        SoloLogger.info("🔍 Fetching workout details: {}", id);
+        Workout workout = workoutRepo.findById(id).orElseThrow(() -> {
+            SoloLogger.error("❌ Workout not found: {}", id);
+            return new WorkoutNotFoundException("Workout not found");
+        });
+
+        if (!workout.getUser().getEmail().equals(email)) {
+            SoloLogger.warn("🚫 Access denied - user {} doesn't own workout {}", email, id);
+            throw new AccessDeniedException("Not your workout");
+        }
+
         return WorkoutMapper.toDto(workout);
     }
 }

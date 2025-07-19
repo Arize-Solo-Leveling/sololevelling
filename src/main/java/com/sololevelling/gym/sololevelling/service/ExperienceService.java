@@ -12,6 +12,7 @@ package com.sololevelling.gym.sololevelling.service;
 
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +25,7 @@ public class ExperienceService {
     }
 
     public void addExperience(User user, int expGained) {
+        SoloLogger.info("✨ Adding {} EXP to user {}", expGained, user.getEmail());
         int exp = user.getExperience() + expGained;
         user.setExperience(exp);
 
@@ -39,10 +41,12 @@ public class ExperienceService {
             exp -= requiredExp;
             level++;
             statPoints += 5;
+            SoloLogger.debug("🎯 User {} leveled up to {} (+5 stat points)", user.getEmail(), level);
         }
         user.setLevel(level);
         user.setStatPoints(statPoints);
         userRepo.save(user);
+        SoloLogger.info("📊 User {} now at level {} with {} stat points", user.getEmail(), level, statPoints);
     }
 
 

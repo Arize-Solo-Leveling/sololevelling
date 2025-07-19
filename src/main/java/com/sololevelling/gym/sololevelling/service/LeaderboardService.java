@@ -14,6 +14,7 @@ import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.model.dto.leaderboard.LeaderboardEntryDto;
 import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,19 +27,30 @@ public class LeaderboardService {
     private UserRepository userRepository;
 
     public List<LeaderboardEntryDto> getGlobalLeaderboard() {
-        return userRepository.findTop10ByOrderByLevelDescExperienceDesc()
-                .stream()
+        SoloLogger.info("🏆 Fetching global leaderboard");
+        List<User> topUsers = userRepository.findTop10ByOrderByLevelDescExperienceDesc();
+
+        List<LeaderboardEntryDto> leaderboard = topUsers.stream()
                 .filter(user -> !"Admin".equals(user.getName()))
                 .map(this::mapToDto)
                 .toList();
+
+        SoloLogger.debug("🌍 Global leaderboard contains {} entries (excluding admin)", leaderboard.size());
+        return leaderboard;
     }
 
     public List<LeaderboardEntryDto> getClassLeaderboard(UserClass userClass) {
-        return userRepository.findTop10ByUserClassOrderByLevelDescExperienceDesc(userClass)
-                .stream()
+        SoloLogger.info("🥇 Fetching {} class leaderboard", userClass);
+        List<User> classUsers = userRepository.findTop10ByUserClassOrderByLevelDescExperienceDesc(userClass);
+
+        List<LeaderboardEntryDto> leaderboard = classUsers.stream()
                 .filter(user -> !"Admin".equals(user.getName()))
                 .map(this::mapToDto)
                 .toList();
+
+        SoloLogger.debug("👥 {} class leaderboard contains {} entries (excluding admin)",
+                userClass, leaderboard.size());
+        return leaderboard;
     }
 
     private LeaderboardEntryDto mapToDto(User user) {

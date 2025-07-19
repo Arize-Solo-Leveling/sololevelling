@@ -22,13 +22,13 @@ import com.sololevelling.gym.sololevelling.repo.AccessTokenRepository;
 import com.sololevelling.gym.sololevelling.repo.RefreshTokenRepository;
 import com.sololevelling.gym.sololevelling.repo.RoleRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
-import com.sololevelling.gym.sololevelling.util.PasswordValidator;
+import com.sololevelling.gym.sololevelling.util.exception.*;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
+import com.sololevelling.gym.sololevelling.util.pass.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,12 +60,19 @@ public class UserService implements UserDetailsService {
     private PasswordValidator passwordValidator;
 
     public String registerUser(AuthRequest req) {
+        SoloLogger.info("📝 Registration attempt for email: {}", req.email);
         if (userRepo.existsByEmail(req.email)) {
-            throw new IllegalArgumentException("Email already registered");
+            SoloLogger.warn("⚠️ Email already registered: {}", req.email);
+            throw new UserAlreadyExistsException("Email already registered");
         }
+
         passwordValidator.validate(req.password);
         Role userRole = roleRepo.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
+                .orElseThrow(() -> {
+                    SoloLogger.error("❌ Default role not found");
+                    return new RoleNotFoundException("Default role not found");
+                });
+
         User user = new User();
         user.setName(req.name);
         user.setEmail(req.email);
@@ -76,22 +83,29 @@ public class UserService implements UserDetailsService {
         user.setRoles(Set.of(userRole));
 
         userRepo.save(user);
+        SoloLogger.info("✅ New user registered: {}", req.email);
         return "Registration successful. Please log in.";
     }
 
     @Transactional
     public AuthResponse loginUser(LoginRequest req) {
+        SoloLogger.info("🔐 Login attempt for email: {}", req.email);
         User user = userRepo.findByEmail(req.email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    SoloLogger.error("❌ User not found: {}", req.email);
+                    return new UserNotFoundException("User not found");
+                });
 
         if (user.isLocked()) {
-            throw new BadCredentialsException("Account is locked. Try again at: " + user.getLockoutUntil());
+            SoloLogger.warn("🔒 Account locked for user: {}", req.email);
+            throw new AccountLockException("Account is locked. Try again at: " + user.getLockoutUntil());
         }
 
         if (!encoder.matches(req.password, user.getPassword())) {
             user.incrementFailedAttempts();
             userRepo.save(user);
-            throw new BadCredentialsException("Invalid password");
+            SoloLogger.warn("❌ Invalid password for user: {}", req.email);
+            throw new InvalidPasswordException("Invalid password");
         }
 
         user.resetFailedAttempts();
@@ -104,10 +118,12 @@ public class UserService implements UserDetailsService {
         saveAccessToken(jwt, user);
         RefreshToken refresh = createRefreshToken(user);
 
+        SoloLogger.info("✅ Successful login for user: {}", req.email);
         return new AuthResponse(jwt, refresh.getToken());
     }
 
     public RefreshToken createRefreshToken(User user) {
+        SoloLogger.debug("🔄 Creating refresh token for user: {}", user.getEmail());
         refreshTokenRepo.deleteByUser(user);
         RefreshToken token = new RefreshToken();
         token.setToken(UUID.randomUUID().toString());
@@ -118,16 +134,24 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public String refreshAccessToken(String refreshToken) {
+        SoloLogger.info("🔄 Refreshing access token");
         Optional<RefreshToken> token = refreshTokenRepo.findByToken(refreshToken);
+        if (token.isEmpty()) {
+            SoloLogger.error("❌ Invalid refresh token");
+            throw new InvalidRefreshTokenException("Invalid refresh token");
+        }
+
         User user = token.get().getUser();
         deleteAccessTokensForUser(user);
         String newAccessToken = jwtUtil.generateToken(user.getEmail());
         saveAccessToken(newAccessToken, user);
 
+        SoloLogger.debug("✅ New access token generated for user: {}", user.getEmail());
         return newAccessToken;
     }
 
     public void saveAccessToken(String token, User user) {
+        SoloLogger.debug("💾 Saving access token for user: {}", user.getEmail());
         AccessToken accessToken = new AccessToken();
         accessToken.setToken(token);
         accessToken.setUser(user);
@@ -137,13 +161,18 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void deleteAccessTokensForUser(User user) {
+        SoloLogger.debug("🗑️ Deleting access tokens for user: {}", user.getEmail());
         accessTokenRepo.deleteByUser(user);
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) {
+        SoloLogger.debug("👤 Loading user details for: {}", email);
         User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    SoloLogger.error("❌ User not found: {}", email);
+                    return new UserNotFoundException("User not found");
+                });
         List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .toList();
@@ -152,25 +181,30 @@ public class UserService implements UserDetailsService {
         );
     }
 
-
     public UserDto getCurrentUserProfile(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow();
+        SoloLogger.info("👤 Fetching profile for user: {}", email);
+        User user = userRepo.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found: {}", email);
+            return new UserNotFoundException("User not found");
+        });
         return UserMapper.toDto(user);
     }
 
     public UserDto allocateStats(String email, StatAllocationRequest request) {
-        User user = userRepo.findByEmail(email).orElseThrow();
+        SoloLogger.info("➕ Allocating stats for user: {}", email);
+        User user = userRepo.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found: {}", email);
+            return new UserNotFoundException("User not found");
+        });
         Stats stats = user.getStats();
 
-        int totalRequested =
-                request.strength +
-                        request.endurance +
-                        request.agility +
-                        request.intelligence +
-                        request.luck;
+        int totalRequested = request.strength + request.endurance +
+                request.agility + request.intelligence + request.luck;
 
         if (user.getStatPoints() < totalRequested) {
-            throw new IllegalArgumentException("Not enough stat points.");
+            SoloLogger.warn("⚠️ Insufficient stat points for user {} (has: {}, needs: {})",
+                    email, user.getStatPoints(), totalRequested);
+            throw new NotEnoughStatPointsException("Not enough stat points.");
         }
 
         stats.setStrength(stats.getStrength() + request.strength);
@@ -180,22 +214,30 @@ public class UserService implements UserDetailsService {
         stats.setLuck(stats.getLuck() + request.luck);
 
         user.setStatPoints(user.getStatPoints() - totalRequested);
-
         userRepo.save(user);
+
+        SoloLogger.debug("📊 New stats for {}: STR {}, END {}, AGI {}, INT {}, LCK {}",
+                email, stats.getStrength(), stats.getEndurance(),
+                stats.getAgility(), stats.getIntelligence(), stats.getLuck());
+
         return UserMapper.toDto(user);
     }
 
     @Transactional
     public void logoutUser(String token) {
         String email = jwtUtil.extractUsername(token);
+        SoloLogger.info("🚪 Logging out user: {}", email);
         User user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> {
+                    SoloLogger.error("❌ User not found: {}", email);
+                    return new UserNotFoundException("User not found");
+                });
 
         deleteAccessTokensForUser(user);
         refreshTokenRepo.deleteByUser(user);
 
         user.setLastLogout(LocalDateTime.now());
         userRepo.save(user);
+        SoloLogger.debug("✅ User {} logged out successfully", email);
     }
-
 }

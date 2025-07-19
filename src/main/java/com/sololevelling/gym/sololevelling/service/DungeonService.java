@@ -21,9 +21,8 @@ import com.sololevelling.gym.sololevelling.model.dto.inventory.InventoryRarity;
 import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
-import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
-import com.sololevelling.gym.sololevelling.util.DungeonNotFoundException;
-import com.sololevelling.gym.sololevelling.util.StatsLowException;
+import com.sololevelling.gym.sololevelling.util.exception.*;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,26 +46,40 @@ public class DungeonService {
 
 
     public List<DungeonDto> getAvailableDungeons(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow();
+        SoloLogger.info("🏰 Fetching available dungeons for user: {}", email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found with email: {}", email);
+            return new UserNotFoundException("User not found");
+        });
         List<Dungeon> dungeons = dungeonRepository.findByUserAndCompletedFalse(user);
+        SoloLogger.debug("Found {} available dungeons for user {}", dungeons.size(), email);
         return dungeons.stream().map(DungeonMapper::toDto).toList();
     }
 
-    public DungeonDto attemptDungeon(ObjectId dungeonId, String email) throws AccessDeniedException, StatsLowException {
-        User user = userRepository.findByEmail(email).orElseThrow();
-        Dungeon dungeon = dungeonRepository.findById(dungeonId).orElseThrow();
+    public DungeonDto attemptDungeon(ObjectId dungeonId, String email) throws AccessDeniedException, StatsLowException, DungeonNotFoundException {
+        SoloLogger.info("⚔️ User {} attempting dungeon {}", email, dungeonId);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found with email: {}", email);
+            return new UserNotFoundException("User not found");
+        });
+        Dungeon dungeon = dungeonRepository.findById(dungeonId).orElseThrow(() -> {
+            SoloLogger.error("❌ Dungeon not found with ID: {}", dungeonId);
+            return new DungeonNotFoundException("Dungeon not found");
+        });
 
         if (!dungeon.getUser().equals(user)) {
+            SoloLogger.warn("🚫 Access denied - user {} doesn't own dungeon {}", email, dungeonId);
             throw new AccessDeniedException("You don't own this dungeon.");
         }
 
         if (dungeon.isCompleted()) {
-            throw new IllegalStateException("Dungeon already completed.");
+            SoloLogger.warn("⚠️ Dungeon {} already completed by user {}", dungeonId, email);
+            throw new TaskCompletedException("Dungeon already completed.");
         }
 
         // Fake stat-based calculation
         boolean success = user.getStats().getStrength() + user.getStats().getEndurance() >= 10;
-
+        SoloLogger.debug("Dungeon attempt result - success: {}", success);
         if (success) {
             dungeon.setCompleted(true);
             InventoryItem reward = generateDungeonLoot(dungeon.getLootReward(), user);
@@ -77,6 +90,7 @@ public class DungeonService {
                 case InventoryRarity.LEGENDARY -> 10;
                 default -> 0;
             };
+            SoloLogger.info("🎉 Dungeon completed! Reward: {} (Rarity: {})", reward.getName(), reward.getRarity());
             List<InventoryItem> currentInventory = user.getInventory();
             if (currentInventory == null) {
                 currentInventory = new ArrayList<>();
@@ -88,15 +102,20 @@ public class DungeonService {
             dungeonRepository.save(dungeon);
             userRepository.save(user);
             experienceService.addExperience(user, dungeon.getExpReward());
-
+            SoloLogger.debug("💾 Saved dungeon completion and rewards for user {}", email);
             return DungeonMapper.toDto(dungeon);
         } else {
+            SoloLogger.warn("❌ Dungeon attempt failed - stats too low for user {}", email);
             throw new StatsLowException("your stats is low");
         }
     }
 
     public DungeonDto createDungeonForUser(DungeonRequest request, ObjectId uuid) {
-        User user = userRepository.findById(uuid).orElseThrow(() -> new RuntimeException("User not found"));
+        SoloLogger.info("🛠️ Creating new dungeon for user {}", uuid);
+        User user = userRepository.findById(uuid).orElseThrow(() -> {
+            SoloLogger.error("User not found: {}", uuid);
+            return new UserNotFoundException("User not found");
+        });
 
         Dungeon dungeon = new Dungeon();
         dungeon.setName(request.getName());
@@ -109,16 +128,24 @@ public class DungeonService {
         dungeon.setExpiresAt(dungeon.getCreatedAt().plusWeeks(1));
         dungeon.setUser(user);
 
-        return DungeonMapper.toDto(dungeonRepository.save(dungeon));
-    }
+        Dungeon savedDungeon = dungeonRepository.save(dungeon);
+        SoloLogger.debug("Created dungeon {} for user {}", savedDungeon.getId(), uuid);
+        return DungeonMapper.toDto(savedDungeon);    }
 
     public List<DungeonDto> getDungeonHistory(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow();
+        SoloLogger.info("📜 Fetching dungeon history for user: {}", email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found with email: {}", email);
+            return new UserNotFoundException("User not found");
+        });
         List<Dungeon> dungeons = dungeonRepository.findByUser(user);
-        return dungeons.stream().filter(Dungeon::isCompleted).map(DungeonMapper::toDto).toList();
+        List<Dungeon> completedDungeons = dungeons.stream().filter(Dungeon::isCompleted).toList();
+        SoloLogger.debug("Found {} completed dungeons for user {}", completedDungeons.size(), email);
+        return completedDungeons.stream().map(DungeonMapper::toDto).toList();
     }
 
     private InventoryItem generateDungeonLoot(String lootHint, User user) {
+        SoloLogger.debug("🎁 Generating dungeon loot for user {}", user.getEmail());
         Random rand = new Random();
 
         // Example item pools
@@ -173,22 +200,24 @@ public class DungeonService {
         }
 
         item.setStatBoosts(stats);
+        SoloLogger.debug("Generated loot: {} (Rarity: {})", item.getName(), item.getRarity());
         return item;
     }
 
     public List<DungeonDto> getAllDungeons() {
-        return dungeonRepository.findAll().stream()
-                .map(DungeonMapper::toDto).toList();
+        SoloLogger.info("🌍 Fetching all dungeons");
+        List<Dungeon> dungeons = dungeonRepository.findAll();
+        SoloLogger.debug("Found {} dungeons total", dungeons.size());
+        return dungeons.stream().map(DungeonMapper::toDto).toList();
     }
 
     public DungeonDto getDungeonById(ObjectId id) throws DungeonNotFoundException {
+        SoloLogger.info("🔍 Fetching dungeon by ID: {}", id);
         Dungeon dungeon = dungeonRepository.findById(id)
-                .orElseThrow(() -> new DungeonNotFoundException("Dungeon not found"));
+                .orElseThrow(() -> {
+                    SoloLogger.error("Dungeon not found: {}", id);
+                    return new DungeonNotFoundException("Dungeon not found");
+                });
         return DungeonMapper.toDto(dungeon);
     }
-
-    public void deleteDungeonById(ObjectId id) {
-        dungeonRepository.deleteById(id);
-    }
-
 }

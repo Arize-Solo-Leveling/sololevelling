@@ -11,6 +11,8 @@
 package com.sololevelling.gym.sololevelling.config;
 
 import com.sololevelling.gym.sololevelling.auth.JwtFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +38,8 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private static final Logger SOLO_LOG = LoggerFactory.getLogger("SOLO_LOG");
+
     @Autowired
     @Lazy
     private JwtFilter jwtFilter;
@@ -46,6 +50,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        SOLO_LOG.info("🛡️ Initializing security filter chain");
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
@@ -57,11 +62,13 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        SOLO_LOG.info("✅ Security configuration completed");
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        SOLO_LOG.info("🌐 Configuring CORS with allowed origins");
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of("http://localhost:3000")); // Frontend URL
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
@@ -75,6 +82,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        SOLO_LOG.info("🔐 Creating BCrypt password encoder");
         return new BCryptPasswordEncoder();
     }
 }

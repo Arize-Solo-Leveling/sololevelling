@@ -17,6 +17,8 @@ import com.sololevelling.gym.sololevelling.model.dto.progress.StatProgressDto;
 import com.sololevelling.gym.sololevelling.model.dto.progress.WorkoutGraphDto;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.repo.WorkoutRepository;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
+import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,8 +33,11 @@ public class ProgressService {
     private WorkoutRepository workoutRepo;
 
     public StatProgressDto getStatProgress(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow();
-
+        SoloLogger.info("📊 Fetching stat progress for user: {}", email);
+        User user = userRepo.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found with email: {}", email);
+            return new UserNotFoundException("User not found");
+        });
         StatProgressDto dto = new StatProgressDto();
         dto.level = user.getLevel();
         dto.strength = user.getStats().getStrength();
@@ -44,7 +49,11 @@ public class ProgressService {
     }
 
     public List<WorkoutGraphDto> getWorkoutGraph(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow();
+        SoloLogger.info("📅 Generating workout graph data for user: {}", email);
+        User user = userRepo.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found with email: {}", email);
+            return new UserNotFoundException("User not found");
+        });
         return workoutRepo.findByUser(user).stream().map(w -> {
             WorkoutGraphDto dto = new WorkoutGraphDto();
             dto.date = w.getDate();
@@ -54,7 +63,11 @@ public class ProgressService {
     }
 
     public ProgressSummaryDto getSummary(String email) {
-        User user = userRepo.findByEmail(email).orElseThrow();
+        SoloLogger.info("📋 Generating progress summary for user: {}", email);
+        User user = userRepo.findByEmail(email).orElseThrow(() -> {
+            SoloLogger.error("❌ User not found with email: {}", email);
+            return new UserNotFoundException("User not found");
+        });
         ProgressSummaryDto dto = new ProgressSummaryDto();
         dto.level = user.getLevel();
         dto.experience = user.getExperience();

@@ -17,6 +17,7 @@ import com.sololevelling.gym.sololevelling.model.init.SystemSetting;
 import com.sololevelling.gym.sololevelling.repo.RoleRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.repo.init.SystemSettingRepository;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,18 +45,19 @@ public class StartupInitializer implements CommandLineRunner {
     public void run(String... args) {
         boolean alreadyInitialized = systemSettingRepository.existsById("init-flag");
         if (alreadyInitialized) {
-            log.info("Initial setup flag found. Skipping initialization.");
+            SoloLogger.info("🚩 Initial setup flag found. Skipping initialization.");
             return;
         }
-
+        SoloLogger.info("🏗️ Starting system initialization...");
         createDefaultRoles();
         createAdminUser();
 
         systemSettingRepository.save(new SystemSetting("init-flag", true));
-        log.info("Initial setup completed and init-flag saved.");
+        SoloLogger.info("🎉 Initial setup completed and init-flag saved.");
     }
 
     private void createDefaultRoles() {
+        SoloLogger.info("🛡️ Creating default roles");
         List<String> roles = List.of("ROLE_USER", "ROLE_ADMIN");
 
         for (String roleName : roles) {
@@ -63,11 +65,15 @@ public class StartupInitializer implements CommandLineRunner {
                 Role role = new Role();
                 role.setName(roleName);
                 roleRepository.save(role);
+                SoloLogger.debug("➕ Created role: {}", roleName);
+            } else {
+                SoloLogger.debug("⏭️ Role already exists: {}", roleName);
             }
         }
     }
 
     private void createAdminUser() {
+        SoloLogger.info("👑 Creating admin user with email: {}", adminEmail);
         String email = adminEmail;
         if (!userRepository.existsByEmail(email)) {
             User admin = new User();
@@ -81,6 +87,9 @@ public class StartupInitializer implements CommandLineRunner {
             admin.setExperience(999999);
             admin.setStats(new Stats());
             userRepository.save(admin);
+            SoloLogger.info("✅ Admin user created successfully");
+        } else {
+            SoloLogger.info("⏭️ Admin user already exists");
         }
     }
 }

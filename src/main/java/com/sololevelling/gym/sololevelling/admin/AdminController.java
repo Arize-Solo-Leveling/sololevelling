@@ -15,8 +15,9 @@ import com.sololevelling.gym.sololevelling.model.dto.admin.StatsResponse;
 import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonRequest;
 import com.sololevelling.gym.sololevelling.model.dto.quest.CreateQuestRequest;
 import com.sololevelling.gym.sololevelling.service.*;
-import com.sololevelling.gym.sololevelling.util.AccessDeniedException;
-import com.sololevelling.gym.sololevelling.util.DungeonNotFoundException;
+import com.sololevelling.gym.sololevelling.util.exception.AccessDeniedException;
+import com.sololevelling.gym.sololevelling.util.exception.DungeonNotFoundException;
+import com.sololevelling.gym.sololevelling.util.exception.WorkoutNotFoundException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -91,12 +92,6 @@ public class AdminController {
         return ResponseEntity.ok(weeklyDungeonService.pickRandomWeeklyDungeon(userId));
     }
 
-    @DeleteMapping("/dungeon/{id}")
-    public ResponseEntity<Void> deleteDungeon(@PathVariable ObjectId id) {
-        dungeonService.deleteDungeonById(id);
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping("/quests")
     public ResponseEntity<?> getAllQuests() {
         return ResponseEntity.ok(questService.getAllQuests());
@@ -117,20 +112,13 @@ public class AdminController {
         return ResponseEntity.ok(questGenerator.pickRandomDailyQuests(userId));
     }
 
-    @DeleteMapping("/quests/{id}")
-    public ResponseEntity<?> deleteQuest(@PathVariable ObjectId id) throws Exception {
-        questService.deleteQuest(id);
-        return ResponseEntity.noContent().build();
-    }
-
-
     @GetMapping("/workout")
     public ResponseEntity<?> getAllWorkouts() {
         return ResponseEntity.ok(adminService.getAllWorkouts());
     }
 
     @GetMapping("/workout/{id}")
-    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id) throws AccessDeniedException {
+    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id) throws WorkoutNotFoundException {
         return ResponseEntity.ok(adminService.getWorkoutDetail(id));
     }
 }
