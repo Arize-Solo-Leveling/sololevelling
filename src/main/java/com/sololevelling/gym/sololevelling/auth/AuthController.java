@@ -10,16 +10,24 @@
 
 package com.sololevelling.gym.sololevelling.auth;
 
-import com.sololevelling.gym.sololevelling.model.dto.auth.AuthRequest;
-import com.sololevelling.gym.sololevelling.model.dto.auth.LoginRequest;
-import com.sololevelling.gym.sololevelling.model.dto.auth.TokenRefreshRequest;
+import com.sololevelling.gym.sololevelling.model.dto.auth.*;
+import com.sololevelling.gym.sololevelling.repo.AccessTokenRepository;
+import com.sololevelling.gym.sololevelling.repo.UserRepository;
+import com.sololevelling.gym.sololevelling.service.TokenValidator;
 import com.sololevelling.gym.sololevelling.service.UserService;
+import com.sololevelling.gym.sololevelling.util.exception.AccountLockException;
+import com.sololevelling.gym.sololevelling.util.exception.InvalidPasswordException;
+import com.sololevelling.gym.sololevelling.util.exception.InvalidRefreshTokenException;
+import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,30 +43,77 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AccessTokenRepository accessTokenRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
+    @Autowired
+    private TokenValidator tokenValidator;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
     public ResponseEntity<?> register(@Valid @RequestBody AuthRequest request) {
-        return ResponseEntity.ok(userService.registerUser(request));
+        if (userRepository.existsByEmail(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(request));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Login existing user")
     @Transactional
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.loginUser(request));
+        try {
+            return ResponseEntity.ok(userService.loginUser(request));
+        } catch (UserNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not found");
+        } catch (InvalidPasswordException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        } catch (AccountLockException ex) {
+            return ResponseEntity.status(HttpStatus.LOCKED).body("Account locked");
+        } catch (AuthenticationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
+        }
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody TokenRefreshRequest request) {
-        String newToken = userService.refreshAccessToken(request.refreshToken);
-        return ResponseEntity.ok(Map.of("accessToken", newToken));
+        try {
+            String newToken = userService.refreshAccessToken(request.refreshToken);
+            return ResponseEntity.ok(Map.of("accessToken", newToken));
+        } catch (InvalidRefreshTokenException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
+        }
     }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing token");
+        }
+
+        String token = authHeader.substring(7);
         userService.logoutUser(token);
+        SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    @PostMapping("/validate")
+    @Operation(summary = "Validate JWT token")
+    public ResponseEntity<TokenValidationResponse> validateToken(@RequestBody @Valid TokenValidationRequest request) {
+        TokenValidationResult result = tokenValidator.validateToken(request.token());
+
+        return ResponseEntity.ok(
+                new TokenValidationResponse(
+                        result.isValid(),
+                        result.isExpired(),
+                        result.getMessage(),
+                        result.getUsername(),
+                        result.getStatus()
+                )
+        );
     }
 }

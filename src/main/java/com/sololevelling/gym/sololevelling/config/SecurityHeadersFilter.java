@@ -33,18 +33,24 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+
         SOLO_LOG.debug("🛡️ Applying security headers to request: {}", request.getRequestURI());
 
+        // Essential security headers
+        response.setHeader("Content-Security-Policy",
+                "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:");
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("X-Frame-Options", "DENY");
         response.setHeader("X-XSS-Protection", "1; mode=block");
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-        response.setHeader("Referrer-Policy", "no-referrer");
-        response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+        response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+        response.setHeader("Permissions-Policy", "geolocation=(), microphone=()");
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
 
         filterChain.doFilter(request, response);
     }
+
     @Override
     public void afterPropertiesSet() {
         SOLO_LOG.info("🛡️ SecurityHeadersFilter initialized and ready");
