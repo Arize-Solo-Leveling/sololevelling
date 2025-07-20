@@ -11,7 +11,6 @@
 package com.sololevelling.gym.sololevelling.model;
 
 import com.sololevelling.gym.sololevelling.model.dto.user.UserClass;
-import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -68,14 +67,12 @@ public class User {
         failedLoginAttempts++;
         if (failedLoginAttempts >= 5) {
             lockoutUntil = LocalDateTime.now().plusMinutes(5);
-            SoloLogger.info("🔒 User {} locked out until {}", name, lockoutUntil);
         }
     }
 
     public void resetFailedAttempts() {
         failedLoginAttempts = 0;
         lockoutUntil = null;
-        SoloLogger.info("🔓 User {} failed login attempts reset", name);
     }
 
     public void completeQuest(Quest quest) {

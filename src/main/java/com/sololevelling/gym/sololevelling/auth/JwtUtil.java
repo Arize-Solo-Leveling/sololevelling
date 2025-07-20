@@ -14,7 +14,6 @@ import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -46,30 +45,12 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    public Date extractIssuedAt(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey.getBytes())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getIssuedAt();
-    }
-
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername());
-    }
-
     public Claims extractAllClaims(String token) throws JwtException {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey.getBytes())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    public Date getExpirationDate(String token) {
-        return extractAllClaims(token).getExpiration();
     }
 
     public boolean validateToken(String token) {

@@ -90,5 +90,4 @@ public class TokenValidator {
             return new TokenValidationResult(false, "Invalid token: " + ex.getMessage(), null, "MALFORMED", false);
         }
     }
-
 }

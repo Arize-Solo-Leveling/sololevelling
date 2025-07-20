@@ -46,10 +46,6 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private AccessTokenRepository accessTokenRepository;
-    @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
     private TokenValidator tokenValidator;
 
     @PostMapping("/register")
