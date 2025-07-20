@@ -16,8 +16,8 @@ import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonDto;
 import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonMapper;
 import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
-import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,12 +52,28 @@ public class WeeklyDungeonService {
     @Autowired
     private UserRepository userRepo;
 
+    private static Dungeon createBaseDungeon(String name, String type, String objective, int exp, String loot) {
+        Dungeon d = new Dungeon();
+        dungeonUSerHelper(name, type, objective, exp, loot, d);
+        d.setCreatedAt(LocalDateTime.now());
+        d.setExpiresAt(d.getCreatedAt().plusWeeks(1));
+        return d;
+    }
+
+    static void dungeonUSerHelper(String name, String type, String objective, int expReward, String lootReward, Dungeon clone) {
+        clone.setName(name);
+        clone.setType(type);
+        clone.setObjective(objective);
+        clone.setExpReward(expReward);
+        clone.setLootReward(lootReward);
+        clone.setCompleted(false);
+    }
+
     @Scheduled(cron = "0 0 0 * * MON")
     public void generateWeeklyDungeons() {
         SoloLogger.info("🏰 Starting weekly dungeon generation");
         List<User> users = userRepo.findAll();
 
-        int totalGenerated = 0;
         for (User user : users) {
             try {
                 List<Dungeon> userDungeons = BASE_WEEKLY_DUNGEONS.stream()
@@ -65,9 +81,9 @@ public class WeeklyDungeonService {
                         .toList();
 
                 dungeonRepo.saveAll(userDungeons);
-                totalGenerated += userDungeons.size();
             } catch (Exception e) {
-                throw new RuntimeException("Failed to generate dungeons for user: " + user.getEmail(), e);            }
+                throw new RuntimeException("Failed to generate dungeons for user: " + user.getEmail(), e);
+            }
         }
     }
 
@@ -86,23 +102,6 @@ public class WeeklyDungeonService {
 
         List<Dungeon> saved = dungeonRepo.saveAll(selected);
         return saved.stream().map(DungeonMapper::toDto).toList();
-    }
-
-    private static Dungeon createBaseDungeon(String name, String type, String objective, int exp, String loot) {
-        Dungeon d = new Dungeon();
-        dungeonUSerHelper(name, type, objective, exp, loot, d);
-        d.setCreatedAt(LocalDateTime.now());
-        d.setExpiresAt(d.getCreatedAt().plusWeeks(1));
-        return d;
-    }
-
-    static void dungeonUSerHelper(String name, String type, String objective, int expReward, String lootReward, Dungeon clone) {
-        clone.setName(name);
-        clone.setType(type);
-        clone.setObjective(objective);
-        clone.setExpReward(expReward);
-        clone.setLootReward(lootReward);
-        clone.setCompleted(false);
     }
 
     private Dungeon cloneDungeonForUser(Dungeon template, User user) {

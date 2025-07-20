@@ -11,13 +11,8 @@
 package com.sololevelling.gym.sololevelling.auth;
 
 import com.sololevelling.gym.sololevelling.model.dto.auth.*;
-import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.service.TokenValidator;
 import com.sololevelling.gym.sololevelling.service.UserService;
-import com.sololevelling.gym.sololevelling.util.exception.AccountLockException;
-import com.sololevelling.gym.sololevelling.util.exception.InvalidPasswordException;
-import com.sololevelling.gym.sololevelling.util.exception.InvalidRefreshTokenException;
-import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +20,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,8 +36,6 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
     @Autowired
     private TokenValidator tokenValidator;
 

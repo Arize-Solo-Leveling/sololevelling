@@ -146,7 +146,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void deleteAccessTokensForUser(User user) {
-        if (userRepo.findById(user.getId()).isEmpty()){
+        if (userRepo.findById(user.getId()).isEmpty()) {
             throw new UserNotFoundException("User not found");
         }
         accessTokenRepo.deleteByUser(user);

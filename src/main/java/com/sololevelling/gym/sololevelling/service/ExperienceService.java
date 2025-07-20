@@ -10,6 +10,7 @@
 
 package com.sololevelling.gym.sololevelling.service;
 
+import com.mongodb.lang.NonNull;
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
@@ -88,6 +89,7 @@ public class ExperienceService {
     public record ExperienceProgress(int totalExpEarned, int currentLevelExp, int expForNextLevel) {
 
         @Override
+        @NonNull
         public String toString() {
             return "Total EXP Earned: " + totalExpEarned +
                     ", Current EXP: " + currentLevelExp +

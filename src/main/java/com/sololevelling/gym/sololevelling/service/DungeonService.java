@@ -192,7 +192,7 @@ public class DungeonService {
     public DungeonDto getDungeonById(ObjectId id) {
         SoloLogger.info("🔍 Fetching dungeon by ID: {}", id);
         Dungeon dungeon = dungeonRepository.findById(id)
-                .orElseThrow(() ->  new DungeonNotFoundException("Dungeon not found"));
+                .orElseThrow(() -> new DungeonNotFoundException("Dungeon not found"));
         return DungeonMapper.toDto(dungeon);
     }
 }

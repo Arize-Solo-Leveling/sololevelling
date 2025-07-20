@@ -17,7 +17,6 @@ import com.sololevelling.gym.sololevelling.model.dto.user.UserMapper;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutDto;
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutMapper;
 import com.sololevelling.gym.sololevelling.repo.*;
-import com.sololevelling.gym.sololevelling.util.exception.AccessDeniedException;
 import com.sololevelling.gym.sololevelling.util.exception.RoleNotFoundException;
 import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
 import com.sololevelling.gym.sololevelling.util.exception.WorkoutNotFoundException;
@@ -140,10 +139,9 @@ public class AdminService {
 
     public List<WorkoutDto> getAllWorkouts() {
         SoloLogger.info("📅 Admin fetching all workouts");
-        List<WorkoutDto> workouts = workoutRepo.findAll()
+        return workoutRepo.findAll()
                 .stream()
                 .map(WorkoutMapper::toDto)
                 .collect(Collectors.toList());
-        return workouts;
     }
 }

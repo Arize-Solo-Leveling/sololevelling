@@ -10,7 +10,6 @@
 
 package com.sololevelling.gym.sololevelling.auth;
 
-import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;

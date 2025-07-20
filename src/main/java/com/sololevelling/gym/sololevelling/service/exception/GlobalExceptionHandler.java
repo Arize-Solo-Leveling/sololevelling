@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -11,12 +11,10 @@
 package com.sololevelling.gym.sololevelling.service.exception;
 
 import com.sololevelling.gym.sololevelling.util.exception.*;
-import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -47,12 +45,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGlobalException(Exception ex, WebRequest request) {
+    public ResponseEntity<Object> handleGlobalException(Exception ex) {
         return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleCustomExceptions(RuntimeException ex, WebRequest request) {
+    public ResponseEntity<Object> handleCustomExceptions(RuntimeException ex) {
         HttpStatus status = EXCEPTION_STATUS_MAP.getOrDefault(ex.getClass(), HttpStatus.BAD_REQUEST);
         return buildErrorResponse(ex, status);
     }

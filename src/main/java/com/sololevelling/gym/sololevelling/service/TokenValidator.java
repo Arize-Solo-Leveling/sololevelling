@@ -1,9 +1,9 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
+ * © 2025 Praveen Kumar. All rights reserved.
+ *
+ * This software is licensed under the MIT License.
+ * See the LICENSE file in the root directory for more information.
 
 
  */
@@ -30,7 +30,7 @@ public class TokenValidator {
     private final AccessTokenRepository accessTokenRepo;
     private final UserRepository userRepository;
 
-    public TokenValidator(JwtUtil jwtUtil, 
+    public TokenValidator(JwtUtil jwtUtil,
                           AccessTokenRepository accessTokenRepo,
                           UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
@@ -70,8 +70,8 @@ public class TokenValidator {
 
             // Logout timestamp validation
             Date issuedAt = claims.getIssuedAt();
-            if (user.getLastLogout() != null && 
-                issuedAt.toInstant().isBefore(user.getLastLogout().atZone(ZoneId.systemDefault()).toInstant())) {
+            if (user.getLastLogout() != null &&
+                    issuedAt.toInstant().isBefore(user.getLastLogout().atZone(ZoneId.systemDefault()).toInstant())) {
                 return new TokenValidationResponse(false, "Token invalidated by logout", username, "LOGGED_OUT", false);
             }
 

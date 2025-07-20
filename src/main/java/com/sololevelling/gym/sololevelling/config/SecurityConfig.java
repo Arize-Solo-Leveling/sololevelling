@@ -36,7 +36,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private static final Logger SOLO_LOG = LoggerFactory.getLogger("SOLO_LOG");

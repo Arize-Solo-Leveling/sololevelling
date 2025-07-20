@@ -17,8 +17,8 @@ import com.sololevelling.gym.sololevelling.model.dto.progress.StatProgressDto;
 import com.sololevelling.gym.sololevelling.model.dto.progress.WorkoutGraphDto;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.repo.WorkoutRepository;
-import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
