@@ -53,7 +53,6 @@ public class QuestGenerator {
     public void generateDailyQuests() {
         SoloLogger.info("🔄 Starting daily quest generation");
         List<User> users = userRepo.findAll();
-        SoloLogger.debug("Found {} users to generate quests for", users.size());
 
         List<Quest> questsToSave = new ArrayList<>();
         for (User user : users) {
@@ -65,8 +64,6 @@ public class QuestGenerator {
         }
 
         questRepo.saveAll(questsToSave);
-        SoloLogger.info("✅ Generated {} daily quests for {} users",
-                questsToSave.size(), users.size());
     }
 
     public List<QuestDto> pickRandomDailyQuests(ObjectId uuid) {
@@ -75,10 +72,7 @@ public class QuestGenerator {
         int count = new Random().nextInt(2) + 2; // 2-3 quests
         List<Quest> selectedTemplates = NEW_QUESTS.subList(0, Math.min(count, NEW_QUESTS.size()));
 
-        User user = userRepo.findById(uuid).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", uuid);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepo.findById(uuid).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         List<Quest> personalizedQuests = new ArrayList<>();
         for (Quest template : selectedTemplates) {
@@ -88,7 +82,6 @@ public class QuestGenerator {
         }
 
         List<Quest> saved = questRepo.saveAll(personalizedQuests);
-        SoloLogger.info("📜 Generated {} quests for user {}", saved.size(), uuid);
         return saved.stream()
                 .map(q -> QuestMapper.toDto(q, user))
                 .toList();

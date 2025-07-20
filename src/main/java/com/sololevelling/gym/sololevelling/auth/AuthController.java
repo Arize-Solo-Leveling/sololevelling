@@ -11,7 +11,6 @@
 package com.sololevelling.gym.sololevelling.auth;
 
 import com.sololevelling.gym.sololevelling.model.dto.auth.*;
-import com.sololevelling.gym.sololevelling.repo.AccessTokenRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
 import com.sololevelling.gym.sololevelling.service.TokenValidator;
 import com.sololevelling.gym.sololevelling.service.UserService;
@@ -51,37 +50,21 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
     public ResponseEntity<?> register(@Valid @RequestBody AuthRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists");
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(request));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.registerUser(request));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Login existing user")
     @Transactional
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            return ResponseEntity.ok(userService.loginUser(request));
-        } catch (UserNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not found");
-        } catch (InvalidPasswordException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        } catch (AccountLockException ex) {
-            return ResponseEntity.status(HttpStatus.LOCKED).body("Account locked");
-        } catch (AuthenticationException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authentication failed");
-        }
+        return ResponseEntity.ok(userService.loginUser(request));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody TokenRefreshRequest request) {
-        try {
-            String newToken = userService.refreshAccessToken(request.refreshToken);
-            return ResponseEntity.ok(Map.of("accessToken", newToken));
-        } catch (InvalidRefreshTokenException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid refresh token");
-        }
+        String newToken = userService.refreshAccessToken(request.refreshToken);
+        return ResponseEntity.ok(Map.of("accessToken", newToken));
     }
 
     @PostMapping("/logout")
@@ -100,16 +83,8 @@ public class AuthController {
     @PostMapping("/validate")
     @Operation(summary = "Validate JWT token")
     public ResponseEntity<TokenValidationResponse> validateToken(@RequestBody @Valid TokenValidationRequest request) {
-        TokenValidationResult result = tokenValidator.validateToken(request.token());
+        return ResponseEntity.ok(tokenValidator.validateToken(request.token()));
 
-        return ResponseEntity.ok(
-                new TokenValidationResponse(
-                        result.isValid(),
-                        result.isExpired(),
-                        result.getMessage(),
-                        result.getUsername(),
-                        result.getStatus()
-                )
-        );
+
     }
 }

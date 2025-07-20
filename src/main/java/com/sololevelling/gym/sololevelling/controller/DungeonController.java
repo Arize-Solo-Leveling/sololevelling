@@ -35,7 +35,7 @@ public class DungeonController {
     }
 
     @PostMapping("/{dungeonId}/attempt")
-    public ResponseEntity<?> attemptDungeon(@PathVariable ObjectId dungeonId, Principal principal) throws AccessDeniedException, StatsLowException, DungeonNotFoundException {
+    public ResponseEntity<?> attemptDungeon(@PathVariable ObjectId dungeonId, Principal principal) {
         return ResponseEntity.ok(dungeonService.attemptDungeon(dungeonId, principal.getName()));
     }
 

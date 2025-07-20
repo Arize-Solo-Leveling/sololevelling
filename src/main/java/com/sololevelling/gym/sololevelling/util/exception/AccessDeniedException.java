@@ -20,7 +20,8 @@
 
 package com.sololevelling.gym.sololevelling.util.exception;
 
-public class AccessDeniedException extends Throwable {
-    public AccessDeniedException(String notYourWorkout) {
+public class AccessDeniedException extends RuntimeException {
+    public AccessDeniedException(String message) {
+        super(message);
     }
 }

@@ -10,7 +10,7 @@
 
 package com.sololevelling.gym.sololevelling.auth;
 
-import com.sololevelling.gym.sololevelling.model.dto.auth.TokenValidationResult;
+import com.sololevelling.gym.sololevelling.model.dto.auth.TokenValidationResponse;
 import com.sololevelling.gym.sololevelling.service.TokenValidator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,8 +34,6 @@ import java.io.IOException;
 @Order(1)
 public class JwtFilter extends OncePerRequestFilter {
 
-    private static final Logger SOLO_LOG = LoggerFactory.getLogger("SOLO_LOG");
-
     private final UserDetailsService userDetailsService;
     private final TokenValidator tokenValidator;
 
@@ -47,23 +45,22 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
-            TokenValidationResult result = tokenValidator.validateToken(token);
+            TokenValidationResponse result = tokenValidator.validateToken(token);
 
-            if (!result.isValid()) {
+            if (!result.valid()) {
                 handleInvalidToken(response, result);
                 return;
             }
 
             // If valid, proceed with authentication
-            String username = result.getUsername();
+            String username = result.username();
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authToken =
@@ -72,22 +69,19 @@ public class JwtFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-        } else {
-            SOLO_LOG.debug("🔒 No JWT found in header for request: {}", request.getRequestURI());
         }
 
         filterChain.doFilter(request, response);
     }
 
     private void handleInvalidToken(HttpServletResponse response,
-                                    TokenValidationResult result)
-            throws IOException {
+                                    TokenValidationResponse result) throws IOException {
 
         int statusCode = HttpStatus.UNAUTHORIZED.value();
-        String message = result.getMessage();
+        String message = result.message();
 
         // Special handling for locked accounts
-        if ("ACCOUNT_LOCKED".equals(result.getStatus())) {
+        if ("ACCOUNT_LOCKED".equals(result.status())) {
             statusCode = HttpStatus.LOCKED.value();
         }
 
@@ -95,7 +89,7 @@ public class JwtFilter extends OncePerRequestFilter {
         response.setStatus(statusCode);
         response.getWriter().write(
                 String.format("{\"error\": \"%s\", \"status\": \"%s\", \"code\": %d}",
-                        message, result.getStatus(), statusCode)
+                        message, result.status(), statusCode)
         );
     }
 }

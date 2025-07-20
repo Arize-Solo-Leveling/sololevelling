@@ -93,7 +93,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        SOLO_LOG.info("🔐 Creating BCrypt password encoder");
         return new BCryptPasswordEncoder();
     }
 }

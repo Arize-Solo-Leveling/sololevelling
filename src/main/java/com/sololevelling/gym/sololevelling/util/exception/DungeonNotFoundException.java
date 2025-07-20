@@ -20,7 +20,8 @@
 
 package com.sololevelling.gym.sololevelling.util.exception;
 
-public class DungeonNotFoundException extends Throwable {
-    public DungeonNotFoundException(String dungeonNotFound) {
+public class DungeonNotFoundException extends RuntimeException {
+    public DungeonNotFoundException(String message) {
+        super(message);
     }
 }

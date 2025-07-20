@@ -44,10 +44,7 @@ public class WorkoutService {
 
     public WorkoutDto submitWorkout(WorkoutRequest request, String email) {
         SoloLogger.info("🏋️ Submitting workout for user: {}", email);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", email);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Workout workout = new Workout();
         workout.setName(request.name);
@@ -58,7 +55,6 @@ public class WorkoutService {
         workout.setExercises(new ArrayList<>());
 
         Workout savedWorkout = workoutRepo.save(workout);
-        SoloLogger.debug("Created base workout {} for user {}", savedWorkout.getId(), email);
 
         double totalVolume = 0;
         List<Exercise> exercises = new ArrayList<>();
@@ -77,7 +73,6 @@ public class WorkoutService {
         }
 
         List<Exercise> savedExercises = exerciseRepo.saveAll(exercises);
-        SoloLogger.debug("Saved {} exercises for workout {}", savedExercises.size(), savedWorkout.getId());
 
         savedWorkout.setExercises(savedExercises);
         savedWorkout.setTotalVolume(totalVolume);
@@ -94,35 +89,23 @@ public class WorkoutService {
         user.setWorkouts(workouts);
         userRepository.save(user);
 
-        SoloLogger.info("✅ Workout {} submitted successfully (Volume: {}, XP: {})",
-                savedWorkout.getId(), totalVolume, xp);
         return WorkoutMapper.toDto(savedWorkout);
     }
 
     public List<WorkoutDto> getWorkoutHistory(String email) {
         SoloLogger.info("📅 Fetching workout history for user: {}", email);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", email);
-            return new UserNotFoundException("User not found");
-        });
-
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
         List<Workout> workouts = workoutRepo.findByUser(user);
-        SoloLogger.debug("Found {} workouts for user {}", workouts.size(), email);
         return workouts.stream().map(WorkoutMapper::toDto).toList();
     }
 
-    public WorkoutDto getWorkoutDetail(ObjectId id, String email) throws AccessDeniedException {
+    public WorkoutDto getWorkoutDetail(ObjectId id, String email) {
         SoloLogger.info("🔍 Fetching workout details: {}", id);
-        Workout workout = workoutRepo.findById(id).orElseThrow(() -> {
-            SoloLogger.error("❌ Workout not found: {}", id);
-            return new WorkoutNotFoundException("Workout not found");
-        });
+        Workout workout = workoutRepo.findById(id).orElseThrow(() -> new WorkoutNotFoundException("Workout not found"));
 
         if (!workout.getUser().getEmail().equals(email)) {
-            SoloLogger.warn("🚫 Access denied - user {} doesn't own workout {}", email, id);
             throw new AccessDeniedException("Not your workout");
         }
-
         return WorkoutMapper.toDto(workout);
     }
 }

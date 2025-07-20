@@ -45,7 +45,7 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    public Claims extractAllClaims(String token) throws JwtException {
+    public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey.getBytes())
                 .build()
@@ -61,10 +61,9 @@ public class JwtUtil {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException ex) {
-            SoloLogger.warn("Token expired: {}", ex.getMessage());
+            throw new JwtException("Token has expired", ex);
         } catch (JwtException | IllegalArgumentException ex) {
-            SoloLogger.error("Invalid token: {}", ex.getMessage());
+            throw new JwtException("Invalid JWT token", ex);
         }
-        return false;
     }
 }

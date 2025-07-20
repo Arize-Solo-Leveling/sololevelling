@@ -56,7 +56,6 @@ public class WeeklyDungeonService {
     public void generateWeeklyDungeons() {
         SoloLogger.info("🏰 Starting weekly dungeon generation");
         List<User> users = userRepo.findAll();
-        SoloLogger.debug("Found {} users to generate dungeons for", users.size());
 
         int totalGenerated = 0;
         for (User user : users) {
@@ -68,19 +67,13 @@ public class WeeklyDungeonService {
                 dungeonRepo.saveAll(userDungeons);
                 totalGenerated += userDungeons.size();
             } catch (Exception e) {
-                SoloLogger.error("❌ Failed to generate dungeons for user {}: {}", user.getEmail(), e.getMessage());
-            }
+                throw new RuntimeException("Failed to generate dungeons for user: " + user.getEmail(), e);            }
         }
-
-        SoloLogger.info("✅ Generated {} weekly dungeons for {} users", totalGenerated, users.size());
     }
 
     public List<DungeonDto> pickRandomWeeklyDungeon(ObjectId userId) {
         SoloLogger.info("🎲 Picking random weekly dungeons for user: {}", userId);
-        User user = userRepo.findById(userId).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", userId);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         List<Dungeon> shuffled = new ArrayList<>(BASE_WEEKLY_DUNGEONS);
         Collections.shuffle(shuffled);
@@ -92,7 +85,6 @@ public class WeeklyDungeonService {
                 .toList();
 
         List<Dungeon> saved = dungeonRepo.saveAll(selected);
-        SoloLogger.info("📜 Generated {} random dungeons for user {}", saved.size(), userId);
         return saved.stream().map(DungeonMapper::toDto).toList();
     }
 

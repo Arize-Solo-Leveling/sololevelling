@@ -34,8 +34,6 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        SOLO_LOG.debug("🛡️ Applying security headers to request: {}", request.getRequestURI());
-
         // Essential security headers
         response.setHeader("Content-Security-Policy",
                 "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:");
@@ -49,10 +47,5 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
         response.setHeader("Pragma", "no-cache");
 
         filterChain.doFilter(request, response);
-    }
-
-    @Override
-    public void afterPropertiesSet() {
-        SOLO_LOG.info("🛡️ SecurityHeadersFilter initialized and ready");
     }
 }

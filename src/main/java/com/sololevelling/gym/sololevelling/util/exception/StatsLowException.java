@@ -20,7 +20,8 @@
 
 package com.sololevelling.gym.sololevelling.util.exception;
 
-public class StatsLowException extends Throwable {
-    public StatsLowException(String notYourWorkout) {
+public class StatsLowException extends RuntimeException {
+    public StatsLowException(String message) {
+        super(message);
     }
 }

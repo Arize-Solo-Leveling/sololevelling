@@ -41,12 +41,10 @@ public class ExperienceService {
             exp -= requiredExp;
             level++;
             statPoints += 5;
-            SoloLogger.debug("🎯 User {} leveled up to {} (+5 stat points)", user.getEmail(), level);
         }
         user.setLevel(level);
         user.setStatPoints(statPoints);
         userRepo.save(user);
-        SoloLogger.info("📊 User {} now at level {} with {} stat points", user.getEmail(), level, statPoints);
     }
 
 

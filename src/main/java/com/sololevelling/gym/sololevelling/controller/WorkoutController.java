@@ -38,7 +38,7 @@ public class WorkoutController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id, Principal principal) throws AccessDeniedException {
+    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id, Principal principal) {
         return ResponseEntity.ok(workoutService.getWorkoutDetail(id, principal.getName()));
     }
 }

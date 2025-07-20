@@ -21,9 +21,8 @@ import com.sololevelling.gym.sololevelling.model.dto.quest.QuestMapper;
 import com.sololevelling.gym.sololevelling.repo.InventoryItemRepository;
 import com.sololevelling.gym.sololevelling.repo.QuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
-import com.sololevelling.gym.sololevelling.util.exception.QuestNotFoundException;
+import com.sololevelling.gym.sololevelling.util.exception.*;
 import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
-import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,24 +42,16 @@ public class QuestService {
     @Autowired
     private InventoryItemRepository inventoryItemRepository;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private ExperienceService experienceService;
-    @Autowired
-    private QuestRepository questRepository;
 
     public List<QuestDto> getAvailableQuests(String email) {
         SoloLogger.info("🗺️ Fetching available quests for user: {}", email);
-        User user = userRepo.findByEmail(email).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", email);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         List<Quest> quests = questRepo.findQuestsByUser_Id(user.getId()).stream()
                 .filter(q -> !q.isCompleted())
                 .toList();
 
-        SoloLogger.debug("Found {} available quests for user {}", quests.size(), email);
         return quests.stream()
                 .map(q -> QuestMapper.toDto(q, user))
                 .toList();
@@ -68,30 +59,23 @@ public class QuestService {
 
     public String completeQuest(ObjectId questId, String email) {
         SoloLogger.info("✅ Attempting to complete quest {} for user {}", questId, email);
-        User user = userRepo.findByEmail(email).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", email);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        Quest quest = questRepo.findById(questId).orElseThrow(() -> {
-            SoloLogger.error("❌ Quest not found: {}", questId);
-            return new QuestNotFoundException("Quest not found");
-        });
+        Quest quest = questRepo.findById(questId).orElseThrow(() -> new QuestNotFoundException("Quest not found"));
 
+        if (!quest.getUser().equals(user)) {
+            throw new AccessDeniedException("You don't own this Quest.");
+        }
         if (LocalDateTime.now().isAfter(quest.getExpiresAt())) {
-            SoloLogger.warn("⚠️ Quest {} expired for user {}", questId, email);
-            return "Quest expired.";
+            throw new ExpireException("Quest has expired.");
         }
 
         if (user.getQuests().contains(quest) && quest.isCompleted()) {
-            SoloLogger.warn("⚠️ Quest {} already completed by user {}", questId, email);
-            return "Already completed.";
+            throw new TaskCompletedException("Quest Already completed.");
         }
 
         InventoryItem rewardItem = generateRandomReward(user);
         inventoryItemRepository.save(rewardItem);
-        SoloLogger.debug("🎁 Generated reward item: {} (Rarity: {})",
-                rewardItem.getName(), rewardItem.getRarity());
 
         user.completeQuest(quest);
         List<InventoryItem> currentInventory = user.getInventory();
@@ -106,13 +90,10 @@ public class QuestService {
         userRepo.save(user);
         experienceService.addExperience(user, quest.getExperienceReward());
 
-        SoloLogger.info("🏆 User {} completed quest {} (+{} EXP)",
-                email, questId, quest.getExperienceReward());
         return "Quest completed. EXP +" + quest.getExperienceReward();
     }
 
     private InventoryItem generateRandomReward(User user) {
-        SoloLogger.debug("🎲 Generating random reward for user {}", user.getEmail());
         Random rand = new Random();
 
         String[] itemNames = {
@@ -165,10 +146,7 @@ public class QuestService {
     public QuestDto createQuest(CreateQuestRequest req, ObjectId uuid) {
         Quest quest = new Quest();
         SoloLogger.info("🛠️ Creating new quest for user {}", uuid);
-        User user = userRepo.findById(uuid).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", uuid);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepo.findById(uuid).orElseThrow(() -> new UserNotFoundException("User not found"));
         quest.setTitle(req.title);
         quest.setDescription(req.description);
         quest.setExperienceReward(req.experienceReward);
@@ -177,21 +155,15 @@ public class QuestService {
         quest.setUser(user);
         questRepo.save(quest);
         Quest saved = questRepo.save(quest);
-        SoloLogger.info("📝 Created new quest {} for user {}", saved.getId(), uuid);
         return QuestMapper.toDto(saved, user);
     }
 
     public List<QuestDto> getQuestHistory(String email) {
         SoloLogger.info("📜 Fetching quest history for user: {}", email);
-        User user = userRepo.findByEmail(email).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", email);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found"));
         List<Quest> completedQuests = questRepo.findQuestsByUser_Id(user.getId()).stream()
                 .filter(Quest::isCompleted)
                 .toList();
-
-        SoloLogger.debug("Found {} completed quests for user {}", completedQuests.size(), email);
         return completedQuests.stream()
                 .map(q -> QuestMapper.toDto(q, user))
                 .toList();
@@ -200,7 +172,6 @@ public class QuestService {
     public List<QuestDto> getAllQuests() {
         SoloLogger.info("🌍 Fetching all quests");
         List<Quest> quests = questRepo.findAll();
-        SoloLogger.debug("Found {} quests total", quests.size());
         return quests.stream()
                 .map(quest -> QuestMapper.toDto(quest, quest.getUser()))
                 .toList();
@@ -209,10 +180,7 @@ public class QuestService {
 
     public QuestDto getQuestById(ObjectId id) {
         SoloLogger.info("🔍 Fetching quest by ID: {}", id);
-        Quest quest = questRepo.findById(id).orElseThrow(() -> {
-            SoloLogger.error("❌ Quest not found: {}", id);
-            return new QuestNotFoundException("Quest not found");
-        });
+        Quest quest = questRepo.findById(id).orElseThrow(() -> new QuestNotFoundException("Quest not found"));
         return QuestMapper.toDto(quest, quest.getUser());
     }
 }
