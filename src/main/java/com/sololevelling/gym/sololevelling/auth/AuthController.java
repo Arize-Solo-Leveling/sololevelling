@@ -11,7 +11,6 @@
 package com.sololevelling.gym.sololevelling.auth;
 
 import com.sololevelling.gym.sololevelling.model.dto.auth.*;
-import com.sololevelling.gym.sololevelling.service.TokenValidator;
 import com.sololevelling.gym.sololevelling.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,8 +35,6 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private TokenValidator tokenValidator;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
@@ -70,13 +67,5 @@ public class AuthController {
         userService.logoutUser(token);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logged out successfully");
-    }
-
-    @PostMapping("/validate")
-    @Operation(summary = "Validate JWT token")
-    public ResponseEntity<TokenValidationResponse> validateToken(@RequestBody @Valid TokenValidationRequest request) {
-        return ResponseEntity.ok(tokenValidator.validateToken(request.token()));
-
-
     }
 }

@@ -12,7 +12,6 @@ package com.sololevelling.gym.sololevelling.auth;
 
 import com.mongodb.lang.NonNull;
 import com.sololevelling.gym.sololevelling.model.dto.auth.TokenValidationResponse;
-import com.sololevelling.gym.sololevelling.service.TokenValidator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

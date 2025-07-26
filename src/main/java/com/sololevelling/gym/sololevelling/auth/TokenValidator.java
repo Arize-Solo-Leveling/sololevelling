@@ -8,9 +8,8 @@
 
  */
 
-package com.sololevelling.gym.sololevelling.service;
+package com.sololevelling.gym.sololevelling.auth;
 
-import com.sololevelling.gym.sololevelling.auth.JwtUtil;
 import com.sololevelling.gym.sololevelling.model.User;
 import com.sololevelling.gym.sololevelling.model.dto.auth.TokenValidationResponse;
 import com.sololevelling.gym.sololevelling.repo.AccessTokenRepository;
