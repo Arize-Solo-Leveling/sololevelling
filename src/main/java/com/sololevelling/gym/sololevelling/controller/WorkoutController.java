@@ -12,7 +12,6 @@ package com.sololevelling.gym.sololevelling.controller;
 
 import com.sololevelling.gym.sololevelling.model.dto.workout.WorkoutRequest;
 import com.sololevelling.gym.sololevelling.service.WorkoutService;
-import com.sololevelling.gym.sololevelling.util.exception.AccessDeniedException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +37,7 @@ public class WorkoutController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id, Principal principal) throws AccessDeniedException {
+    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id, Principal principal) {
         return ResponseEntity.ok(workoutService.getWorkoutDetail(id, principal.getName()));
     }
 }

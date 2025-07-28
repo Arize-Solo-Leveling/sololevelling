@@ -10,11 +10,9 @@
 
 package com.sololevelling.gym.sololevelling.auth;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -46,17 +44,25 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    public Date extractIssuedAt(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey.getBytes())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getIssuedAt();
+                .getBody();
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername());
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(secretKey.getBytes())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException ex) {
+            throw new JwtException("Token has expired", ex);
+        } catch (JwtException | IllegalArgumentException ex) {
+            throw new JwtException("Invalid JWT token", ex);
+        }
     }
 }

@@ -53,7 +53,6 @@ public class StartupInitializer implements CommandLineRunner {
         createAdminUser();
 
         systemSettingRepository.save(new SystemSetting("init-flag", true));
-        SoloLogger.info("🎉 Initial setup completed and init-flag saved.");
     }
 
     private void createDefaultRoles() {
@@ -65,9 +64,6 @@ public class StartupInitializer implements CommandLineRunner {
                 Role role = new Role();
                 role.setName(roleName);
                 roleRepository.save(role);
-                SoloLogger.debug("➕ Created role: {}", roleName);
-            } else {
-                SoloLogger.debug("⏭️ Role already exists: {}", roleName);
             }
         }
     }
@@ -87,9 +83,6 @@ public class StartupInitializer implements CommandLineRunner {
             admin.setExperience(999999);
             admin.setStats(new Stats());
             userRepository.save(admin);
-            SoloLogger.info("✅ Admin user created successfully");
-        } else {
-            SoloLogger.info("⏭️ Admin user already exists");
         }
     }
 }

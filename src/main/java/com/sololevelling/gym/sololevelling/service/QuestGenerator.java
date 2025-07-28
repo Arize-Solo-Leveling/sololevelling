@@ -16,8 +16,8 @@ import com.sololevelling.gym.sololevelling.model.dto.quest.QuestDto;
 import com.sololevelling.gym.sololevelling.model.dto.quest.QuestMapper;
 import com.sololevelling.gym.sololevelling.repo.QuestRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
-import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,11 +49,21 @@ public class QuestGenerator {
     @Autowired
     private UserRepository userRepo;
 
+    private static Quest createQuest(String title, String desc, int xp) {
+        Quest q = new Quest();
+        q.setTitle(title);
+        q.setDescription(desc);
+        q.setExperienceReward(xp);
+        q.setCreatedAt(LocalDateTime.now());
+        q.setExpiresAt(q.getCreatedAt().plusDays(1));
+        q.setCompleted(false);
+        return q;
+    }
+
     @Scheduled(cron = "0 0 0 * * *")
     public void generateDailyQuests() {
         SoloLogger.info("🔄 Starting daily quest generation");
         List<User> users = userRepo.findAll();
-        SoloLogger.debug("Found {} users to generate quests for", users.size());
 
         List<Quest> questsToSave = new ArrayList<>();
         for (User user : users) {
@@ -65,20 +75,16 @@ public class QuestGenerator {
         }
 
         questRepo.saveAll(questsToSave);
-        SoloLogger.info("✅ Generated {} daily quests for {} users",
-                questsToSave.size(), users.size());
     }
 
     public List<QuestDto> pickRandomDailyQuests(ObjectId uuid) {
         SoloLogger.info("🎲 Picking random daily quests for user: {}", uuid);
-        Collections.shuffle(NEW_QUESTS);
+        List<Quest> mutableQuests = new ArrayList<>(NEW_QUESTS);
+        Collections.shuffle(mutableQuests);
         int count = new Random().nextInt(2) + 2; // 2-3 quests
-        List<Quest> selectedTemplates = NEW_QUESTS.subList(0, Math.min(count, NEW_QUESTS.size()));
+        List<Quest> selectedTemplates = mutableQuests.subList(0, Math.min(count, mutableQuests.size()));
 
-        User user = userRepo.findById(uuid).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", uuid);
-            return new UserNotFoundException("User not found");
-        });
+        User user = userRepo.findById(uuid).orElseThrow(() -> new UserNotFoundException("User not found"));
 
         List<Quest> personalizedQuests = new ArrayList<>();
         for (Quest template : selectedTemplates) {
@@ -88,20 +94,8 @@ public class QuestGenerator {
         }
 
         List<Quest> saved = questRepo.saveAll(personalizedQuests);
-        SoloLogger.info("📜 Generated {} quests for user {}", saved.size(), uuid);
         return saved.stream()
                 .map(q -> QuestMapper.toDto(q, user))
                 .toList();
-    }
-
-    private static Quest createQuest(String title, String desc, int xp) {
-        Quest q = new Quest();
-        q.setTitle(title);
-        q.setDescription(desc);
-        q.setExperienceReward(xp);
-        q.setCreatedAt(LocalDateTime.now());
-        q.setExpiresAt(q.getCreatedAt().plusDays(1));
-        q.setCompleted(false);
-        return q;
     }
 }

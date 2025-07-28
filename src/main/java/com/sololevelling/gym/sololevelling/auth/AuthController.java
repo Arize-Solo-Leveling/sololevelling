@@ -10,16 +10,16 @@
 
 package com.sololevelling.gym.sololevelling.auth;
 
-import com.sololevelling.gym.sololevelling.model.dto.auth.AuthRequest;
-import com.sololevelling.gym.sololevelling.model.dto.auth.LoginRequest;
-import com.sololevelling.gym.sololevelling.model.dto.auth.TokenRefreshRequest;
+import com.sololevelling.gym.sololevelling.model.dto.auth.*;
 import com.sololevelling.gym.sololevelling.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,7 +39,8 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
     public ResponseEntity<?> register(@Valid @RequestBody AuthRequest request) {
-        return ResponseEntity.ok(userService.registerUser(request));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userService.registerUser(request));
     }
 
     @PostMapping("/login")
@@ -57,8 +58,14 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing token");
+        }
+
+        String token = authHeader.substring(7);
         userService.logoutUser(token);
+        SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logged out successfully");
     }
 }

@@ -15,9 +15,6 @@ import com.sololevelling.gym.sololevelling.model.dto.admin.StatsResponse;
 import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonRequest;
 import com.sololevelling.gym.sololevelling.model.dto.quest.CreateQuestRequest;
 import com.sololevelling.gym.sololevelling.service.*;
-import com.sololevelling.gym.sololevelling.util.exception.AccessDeniedException;
-import com.sololevelling.gym.sololevelling.util.exception.DungeonNotFoundException;
-import com.sololevelling.gym.sololevelling.util.exception.WorkoutNotFoundException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +74,7 @@ public class AdminController {
     }
 
     @GetMapping("/dungeon/{id}")
-    public ResponseEntity<?> getDungeonById(@PathVariable ObjectId id) throws DungeonNotFoundException {
+    public ResponseEntity<?> getDungeonById(@PathVariable ObjectId id) {
         return ResponseEntity.ok(dungeonService.getDungeonById(id));
     }
 
@@ -118,7 +115,7 @@ public class AdminController {
     }
 
     @GetMapping("/workout/{id}")
-    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id) throws WorkoutNotFoundException {
+    public ResponseEntity<?> getWorkoutDetail(@PathVariable ObjectId id) {
         return ResponseEntity.ok(adminService.getWorkoutDetail(id));
     }
 }

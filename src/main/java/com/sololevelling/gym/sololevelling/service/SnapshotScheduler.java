@@ -37,9 +37,6 @@ public class SnapshotScheduler {
         List<User> users = userRepo.findAll();
         LocalDate today = LocalDate.now();
 
-        SoloLogger.debug("Found {} users to snapshot", users.size());
-        int snapshotCount = 0;
-
         for (User user : users) {
             try {
                 StatSnapshot snapshot = new StatSnapshot();
@@ -59,11 +56,9 @@ public class SnapshotScheduler {
                 snapshot.setVolume(totalVolume);
 
                 snapshotRepo.save(snapshot);
-                snapshotCount++;
             } catch (Exception e) {
-                SoloLogger.error("❌ Failed to save snapshot for user {}: {}", user.getEmail(), e.getMessage());
+                throw new RuntimeException("Failed to save snapshot for user: " + user.getEmail(), e);
             }
         }
-        SoloLogger.info("✅ Completed daily snapshots. Saved {} snapshots", snapshotCount);
     }
 }

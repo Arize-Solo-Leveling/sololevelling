@@ -1,15 +1,5 @@
 /*
 
-  * © 2025 Praveen Kumar. All rights reserved.
-  *
-  * This software is licensed under the MIT License.
-  * See the LICENSE file in the root directory for more information.
-
-
- */
-
-/*
-
  * © 2025 Praveen Kumar. All rights reserved.
  *
  * This software is licensed under the MIT License.
@@ -20,7 +10,8 @@
 
 package com.sololevelling.gym.sololevelling.util.exception;
 
-public class DungeonNotFoundException extends Throwable {
-    public DungeonNotFoundException(String dungeonNotFound) {
+public class DungeonNotFoundException extends RuntimeException {
+    public DungeonNotFoundException(String message) {
+        super(message);
     }
 }

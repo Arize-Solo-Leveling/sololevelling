@@ -11,9 +11,6 @@
 package com.sololevelling.gym.sololevelling.controller;
 
 import com.sololevelling.gym.sololevelling.service.DungeonService;
-import com.sololevelling.gym.sololevelling.util.exception.AccessDeniedException;
-import com.sololevelling.gym.sololevelling.util.exception.DungeonNotFoundException;
-import com.sololevelling.gym.sololevelling.util.exception.StatsLowException;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +32,7 @@ public class DungeonController {
     }
 
     @PostMapping("/{dungeonId}/attempt")
-    public ResponseEntity<?> attemptDungeon(@PathVariable ObjectId dungeonId, Principal principal) throws AccessDeniedException, StatsLowException, DungeonNotFoundException {
+    public ResponseEntity<?> attemptDungeon(@PathVariable ObjectId dungeonId, Principal principal) {
         return ResponseEntity.ok(dungeonService.attemptDungeon(dungeonId, principal.getName()));
     }
 

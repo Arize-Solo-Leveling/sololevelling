@@ -16,8 +16,8 @@ import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonDto;
 import com.sololevelling.gym.sololevelling.model.dto.dungeon.DungeonMapper;
 import com.sololevelling.gym.sololevelling.repo.DungeonRepository;
 import com.sololevelling.gym.sololevelling.repo.UserRepository;
-import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import com.sololevelling.gym.sololevelling.util.exception.UserNotFoundException;
+import com.sololevelling.gym.sololevelling.util.log.SoloLogger;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -52,50 +52,6 @@ public class WeeklyDungeonService {
     @Autowired
     private UserRepository userRepo;
 
-    @Scheduled(cron = "0 0 0 * * MON")
-    public void generateWeeklyDungeons() {
-        SoloLogger.info("🏰 Starting weekly dungeon generation");
-        List<User> users = userRepo.findAll();
-        SoloLogger.debug("Found {} users to generate dungeons for", users.size());
-
-        int totalGenerated = 0;
-        for (User user : users) {
-            try {
-                List<Dungeon> userDungeons = BASE_WEEKLY_DUNGEONS.stream()
-                        .map(base -> cloneDungeonForUser(base, user))
-                        .toList();
-
-                dungeonRepo.saveAll(userDungeons);
-                totalGenerated += userDungeons.size();
-            } catch (Exception e) {
-                SoloLogger.error("❌ Failed to generate dungeons for user {}: {}", user.getEmail(), e.getMessage());
-            }
-        }
-
-        SoloLogger.info("✅ Generated {} weekly dungeons for {} users", totalGenerated, users.size());
-    }
-
-    public List<DungeonDto> pickRandomWeeklyDungeon(ObjectId userId) {
-        SoloLogger.info("🎲 Picking random weekly dungeons for user: {}", userId);
-        User user = userRepo.findById(userId).orElseThrow(() -> {
-            SoloLogger.error("❌ User not found: {}", userId);
-            return new UserNotFoundException("User not found");
-        });
-
-        List<Dungeon> shuffled = new ArrayList<>(BASE_WEEKLY_DUNGEONS);
-        Collections.shuffle(shuffled);
-
-        int count = new Random().nextInt(2) + 2; // 2-3 dungeons
-        List<Dungeon> selected = shuffled.subList(0, Math.min(count, shuffled.size()))
-                .stream()
-                .map(d -> cloneDungeonForUser(d, user))
-                .toList();
-
-        List<Dungeon> saved = dungeonRepo.saveAll(selected);
-        SoloLogger.info("📜 Generated {} random dungeons for user {}", saved.size(), userId);
-        return saved.stream().map(DungeonMapper::toDto).toList();
-    }
-
     private static Dungeon createBaseDungeon(String name, String type, String objective, int exp, String loot) {
         Dungeon d = new Dungeon();
         dungeonUSerHelper(name, type, objective, exp, loot, d);
@@ -111,6 +67,41 @@ public class WeeklyDungeonService {
         clone.setExpReward(expReward);
         clone.setLootReward(lootReward);
         clone.setCompleted(false);
+    }
+
+    @Scheduled(cron = "0 0 0 * * MON")
+    public void generateWeeklyDungeons() {
+        SoloLogger.info("🏰 Starting weekly dungeon generation");
+        List<User> users = userRepo.findAll();
+
+        for (User user : users) {
+            try {
+                List<Dungeon> userDungeons = BASE_WEEKLY_DUNGEONS.stream()
+                        .map(base -> cloneDungeonForUser(base, user))
+                        .toList();
+
+                dungeonRepo.saveAll(userDungeons);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to generate dungeons for user: " + user.getEmail(), e);
+            }
+        }
+    }
+
+    public List<DungeonDto> pickRandomWeeklyDungeon(ObjectId userId) {
+        SoloLogger.info("🎲 Picking random weekly dungeons for user: {}", userId);
+        User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        List<Dungeon> shuffled = new ArrayList<>(BASE_WEEKLY_DUNGEONS);
+        Collections.shuffle(shuffled);
+
+        int count = new Random().nextInt(2) + 2; // 2-3 dungeons
+        List<Dungeon> selected = shuffled.subList(0, Math.min(count, shuffled.size()))
+                .stream()
+                .map(d -> cloneDungeonForUser(d, user))
+                .toList();
+
+        List<Dungeon> saved = dungeonRepo.saveAll(selected);
+        return saved.stream().map(DungeonMapper::toDto).toList();
     }
 
     private Dungeon cloneDungeonForUser(Dungeon template, User user) {

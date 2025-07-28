@@ -30,27 +30,19 @@ public class LeaderboardService {
         SoloLogger.info("🏆 Fetching global leaderboard");
         List<User> topUsers = userRepository.findTop10ByOrderByLevelDescExperienceDesc();
 
-        List<LeaderboardEntryDto> leaderboard = topUsers.stream()
+        return topUsers.stream()
                 .filter(user -> !"Admin".equals(user.getName()))
                 .map(this::mapToDto)
                 .toList();
-
-        SoloLogger.debug("🌍 Global leaderboard contains {} entries (excluding admin)", leaderboard.size());
-        return leaderboard;
     }
 
     public List<LeaderboardEntryDto> getClassLeaderboard(UserClass userClass) {
         SoloLogger.info("🥇 Fetching {} class leaderboard", userClass);
         List<User> classUsers = userRepository.findTop10ByUserClassOrderByLevelDescExperienceDesc(userClass);
-
-        List<LeaderboardEntryDto> leaderboard = classUsers.stream()
+        return classUsers.stream()
                 .filter(user -> !"Admin".equals(user.getName()))
                 .map(this::mapToDto)
                 .toList();
-
-        SoloLogger.debug("👥 {} class leaderboard contains {} entries (excluding admin)",
-                userClass, leaderboard.size());
-        return leaderboard;
     }
 
     private LeaderboardEntryDto mapToDto(User user) {

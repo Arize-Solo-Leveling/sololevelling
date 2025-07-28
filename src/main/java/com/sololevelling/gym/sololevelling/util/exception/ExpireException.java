@@ -10,8 +10,8 @@
 
 package com.sololevelling.gym.sololevelling.util.exception;
 
-public class TaskCompletedException extends RuntimeException {
-    public TaskCompletedException(String message) {
+public class ExpireException extends RuntimeException {
+    public ExpireException(String message) {
         super(message);
     }
 }
